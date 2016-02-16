@@ -1,0 +1,30 @@
+{
+  "people": [
+    {
+      "id": 1,
+      "name": "Chaos",
+      "shortDescription": "Everyone's father",
+      "description": null
+    },
+    {
+      "id": 2,
+      "name": "Gaia",
+      "shortDescription": "De Aarde",
+      "description": null
+    }
+  ],
+  "relations": [
+    {
+      "id": 1,
+      "personId1": 1,
+      "description": null,
+      "relationType": null
+    }
+  ],
+  "births": [
+    {
+      "personId": 2,
+      "relationId": 1
+    }
+  ]
+}
