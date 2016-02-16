@@ -1,0 +1,18 @@
+# Data model
+
+## Person
+ - personId             integer primary key autoincrement           not null
+ - name                 string                                      null
+ - description          string                                      null
+ - shortDescription     string                                      null
+
+## Relation
+ - relationId           integer primary key autoincrement           not null
+ - personId1            integer foreign key                         not null
+ - personId2            integer foreign key                         null
+ - description          string                                      null
+ - relationType         enum [MARRIAGE, AFFAIR]                     null
+
+## Birth
+ - personId             integer primary key autoincrement           not null
+ - relationId           integer foreign key                         null
