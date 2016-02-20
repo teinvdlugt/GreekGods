@@ -22,6 +22,7 @@ public class Person {
     private String name;
     private String description, shortDescription;
     private List<Relation> relations;
+    private int id;
 
     public Person(String name, List<Relation> relations) {
         this.name = name;
@@ -29,6 +30,14 @@ public class Person {
     }
 
     public Person() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

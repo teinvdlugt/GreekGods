@@ -17,6 +17,7 @@
 package com.teinvdlugt.android.greekgods;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
@@ -24,6 +25,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -45,6 +47,10 @@ public class MainActivity extends AppCompatActivity {
         nameTextView = (TextView) findViewById(R.id.name_textView);
 
         fillDatabase();
+    }
+
+    public void onClickAllPeople(View view) {
+        startActivity(new Intent(this, AllPeopleActivity.class));
     }
 
     private void fillDatabase() {
@@ -74,17 +80,23 @@ public class MainActivity extends AppCompatActivity {
                 String peopleSQLStatements = downloadFile("http://teinvdlugt.netai.net/people.sql");
                 if (peopleSQLStatements != null) {
                     peopleSQLStatements = peopleSQLStatements.replaceAll("kcv.people", "people");
-                    db.execSQL(peopleSQLStatements);
+                    String[] statements = peopleSQLStatements.split("\n");
+                    for (String statement : statements)
+                        db.execSQL(statement);
                 }
                 String relationsSQLStatements = downloadFile("http://teinvdlugt.netai.net/relations.sql");
                 if (relationsSQLStatements != null) {
                     relationsSQLStatements = relationsSQLStatements.replaceAll("kcv.relations", "relations");
-                    db.execSQL(relationsSQLStatements);
+                    String[] statements = relationsSQLStatements.split("\n");
+                    for (String statement : statements)
+                        db.execSQL(statement);
                 }
                 String birthsSQLStatements = downloadFile("http://teinvdlugt.netai.net/births.sql");
                 if (birthsSQLStatements != null) {
                     birthsSQLStatements = birthsSQLStatements.replaceAll("kcv.births", "births");
-                    db.execSQL(birthsSQLStatements);
+                    String[] statements = birthsSQLStatements.split("\n");
+                    for (String statement : statements)
+                        db.execSQL(statement);
                 }
 
                 db.close();
