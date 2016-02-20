@@ -18,15 +18,16 @@ package com.teinvdlugt.android.greekgods;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,27 +38,41 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView nameTextView;
+    private CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
-        nameTextView = (TextView) findViewById(R.id.name_textView);
-
-        fillDatabase();
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
     }
 
     public void onClickAllPeople(View view) {
         startActivity(new Intent(this, AllPeopleActivity.class));
     }
 
+    public void onClickRefreshDatabase(View view) {
+        fillDatabase();
+    }
+
     private void fillDatabase() {
         new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                Snackbar.make(coordinatorLayout, R.string.refreshing_database, Snackbar.LENGTH_INDEFINITE).show();
+            }
+
             @Override
             protected Void doInBackground(Void... params) {
                 if (checkNotConnected()) return null;
+                String peopleSQLStatements = downloadFile("http://teinvdlugt.netai.net/people.sql");
+                String relationsSQLStatements = downloadFile("http://teinvdlugt.netai.net/relations.sql");
+                String birthsSQLStatements = downloadFile("http://teinvdlugt.netai.net/births.sql");
+
                 SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
                 db.execSQL("DROP TABLE IF EXISTS `people`;");
                 db.execSQL("DROP TABLE IF EXISTS `relations`;");
@@ -77,21 +92,18 @@ public class MainActivity extends AppCompatActivity {
                         "  `personId` int(11) NOT NULL,\n" +
                         "  `relationId` int(11) NOT NULL)");
 
-                String peopleSQLStatements = downloadFile("http://teinvdlugt.netai.net/people.sql");
                 if (peopleSQLStatements != null) {
                     peopleSQLStatements = peopleSQLStatements.replaceAll("kcv.people", "people");
                     String[] statements = peopleSQLStatements.split("\n");
                     for (String statement : statements)
                         db.execSQL(statement);
                 }
-                String relationsSQLStatements = downloadFile("http://teinvdlugt.netai.net/relations.sql");
                 if (relationsSQLStatements != null) {
                     relationsSQLStatements = relationsSQLStatements.replaceAll("kcv.relations", "relations");
                     String[] statements = relationsSQLStatements.split("\n");
                     for (String statement : statements)
                         db.execSQL(statement);
                 }
-                String birthsSQLStatements = downloadFile("http://teinvdlugt.netai.net/births.sql");
                 if (birthsSQLStatements != null) {
                     birthsSQLStatements = birthsSQLStatements.replaceAll("kcv.births", "births");
                     String[] statements = birthsSQLStatements.split("\n");
@@ -107,13 +119,12 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     URL url = new URL(URL);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setReadTimeout(20000);
-                    conn.setConnectTimeout(30000);
+                    conn.setReadTimeout(10000);
+                    conn.setConnectTimeout(15000);
                     conn.setRequestMethod("GET");
                     conn.setDoInput(true);
                     conn.connect();
                     int response = conn.getResponseCode();
-                    //Log.d("THEVERGE", "Response: " + response);
                     if (response >= 400) return "" + response;
                     InputStream is = conn.getInputStream();
                     return read(is);
@@ -142,13 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                // For debugging, show name of first person (Chaos)
-                SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
-                Cursor cursor = db.query("people", new String[]{"name"}, null, null, null, null, null, "1");
-                cursor.moveToFirst();
-                nameTextView.setText(cursor.getString(cursor.getColumnIndex("name")));
-                cursor.close();
-                db.close();
+                Snackbar.make(coordinatorLayout, R.string.refresh_database_done, Snackbar.LENGTH_LONG).show();
             }
         }.execute();
     }

@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Griekse Goden</string>
     <string name="all_people">Alle familieleden</string>
+    <string name="refresh_database">Database verversen</string>
+    <string name="refreshing_database">Database verversen…</string>
+    <string name="refresh_database_done">Database ververst!</string>
 </resources>
