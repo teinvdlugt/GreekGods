@@ -11,6 +11,7 @@
     tools:context="com.teinvdlugt.android.greekgods.MainActivity">
 
     <TextView
+        android:id="@+id/name_textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!" />
