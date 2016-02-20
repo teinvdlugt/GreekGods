@@ -8,7 +8,7 @@
 
 ## Relation
  - relationId           integer primary key autoincrement           not null
- - personId1            integer foreign key                         not null
+ - personId1            integer foreign key                         null
  - personId2            integer foreign key                         null
  - description          string                                      null
  - relationType         enum [MARRIAGE, AFFAIR]                     null
