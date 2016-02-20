@@ -22,6 +22,10 @@
         <activity
             android:name=".AllPeopleActivity"
             android:label="@string/all_people" />
+
+        <activity
+            android:name=".PersonActivity"
+            android:label="@string/person" />
     </application>
 
 </manifest>

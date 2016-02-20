@@ -16,6 +16,7 @@
  */
 package com.teinvdlugt.android.greekgods;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -86,7 +87,9 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
 
     @Override
     public void onClickPerson(Person person) {
-        Snackbar.make(recyclerView, "Well done, you clicked " + person.getName() + "'s name!", Snackbar.LENGTH_LONG).show();
+        Intent intent = new Intent(this, PersonActivity.class);
+        intent.putExtra(PersonActivity.PERSON_ID_EXTRA, person.getId());
+        startActivity(intent);
     }
 
     @Override

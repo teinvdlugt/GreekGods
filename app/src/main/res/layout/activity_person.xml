@@ -5,7 +5,7 @@
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.teinvdlugt.android.greekgods.MainActivity">
+    tools:context=".PersonActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -35,17 +35,34 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin">
 
-            <Button
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="onClickAllPeople"
-                android:text="@string/all_people" />
+                android:text="@string/parents"
+                android:textColor="@android:color/black"
+                android:textSize="20sp" />
 
-            <Button
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/parents_textView"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="onClickRefreshDatabase"
-                android:text="@string/refresh_database" />
+                android:textSize="18sp"
+                tools:text="Zeus en Semele" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/relations"
+                android:textColor="@android:color/black"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/relations_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                tools:text="Klytaimnestra (2 kinderen)" />
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 </android.support.design.widget.CoordinatorLayout>
