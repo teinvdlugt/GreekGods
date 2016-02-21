@@ -17,6 +17,7 @@
 package com.teinvdlugt.android.greekgods;
 
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
@@ -93,6 +94,7 @@ public class PersonActivity extends AppCompatActivity {
                     } while (c.moveToNext());
                 } catch (SQLiteException e) {
                     e.printStackTrace();
+                } catch (CursorIndexOutOfBoundsException ignored) {
                 } finally {
                     if (c != null) c.close();
                 }
@@ -106,17 +108,15 @@ public class PersonActivity extends AppCompatActivity {
                 if (name != null) {
                     setTitle(name);
                 }
-                if (parents != null) {
-                    if (parents.isEmpty()) {
-                        parentsTextView.setText(R.string.no_parents);
-                    } else {
-                        StringBuilder sb = new StringBuilder();
-                        for (String parent : parents) {
-                            sb.append(parent).append(", ");
-                        }
-                        sb.delete(sb.length() - 2, sb.length());
-                        parentsTextView.setText(sb);
+                if (parents == null || parents.isEmpty()) {
+                    parentsTextView.setText(R.string.no_parents);
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    for (String parent : parents) {
+                        sb.append(parent).append(", ");
                     }
+                    sb.delete(sb.length() - 2, sb.length());
+                    parentsTextView.setText(sb);
                 }
             }
         }.execute();
