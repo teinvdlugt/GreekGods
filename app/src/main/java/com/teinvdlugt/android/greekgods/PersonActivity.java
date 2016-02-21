@@ -62,7 +62,7 @@ public class PersonActivity extends AppCompatActivity {
         new AsyncTask<Void, Void, Void>() {
             private String name;
             private List<String> parents;
-            private String relations;
+            private List<String> relations;
 
             @Override
             protected Void doInBackground(Void... params) {
@@ -99,6 +99,24 @@ public class PersonActivity extends AppCompatActivity {
                     if (c != null) c.close();
                 }
 
+                // Relations
+                try {
+                    String relationsQuery = String.format(DBUtils.RELATIONS_QUERY, personId);
+                    c = db.rawQuery(relationsQuery, null);
+                    int nameColumn = c.getColumnIndex("name");
+                    int relationIdColumn = c.getColumnIndex("relatiod_id");
+                    c.moveToFirst();
+                    relations = new ArrayList<>();
+                    do {
+                        relations.add(c.getString(nameColumn));
+                    } while (c.moveToNext());
+                } catch (SQLiteException e) {
+                    e.printStackTrace();
+                } catch (CursorIndexOutOfBoundsException ignored) {
+                } finally {
+                    if (c != null) c.close();
+                }
+
                 db.close();
                 return null;
             }
@@ -117,6 +135,16 @@ public class PersonActivity extends AppCompatActivity {
                     }
                     sb.delete(sb.length() - 2, sb.length());
                     parentsTextView.setText(sb);
+                }
+                if (relations == null || relations.isEmpty()) {
+                    relationsTextView.setText(R.string.no_relations);
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    for (String relation : relations) {
+                        sb.append(relation).append("\n");
+                    }
+                    sb.delete(sb.length() - 1, sb.length());
+                    relationsTextView.setText(sb);
                 }
             }
         }.execute();

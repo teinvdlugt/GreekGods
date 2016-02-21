@@ -18,7 +18,8 @@ package com.teinvdlugt.android.greekgods;
 
 public class DBUtils {
     /**
-     * Format this String using one argument, being the id of the person
+     * Format this String using one argument, being the id
+     * of the person you want to know the parents of
      */
     public static final String PARENTS_QUERY = "SELECT p.name\n" +
             "FROM people p\n" +
@@ -39,5 +40,19 @@ public class DBUtils {
             "    )\n" +
             "  ))\n" +
             ")";
+
+    /**
+     * Format this String using one argument, being the id of
+     * the person you want to know the relations of
+     */
+    public static final String RELATIONS_QUERY = "SELECT\n" +
+            "  p.personId,\n" +
+            "  p.name,\n" +
+            "  r.relatiod_id\n" +
+            "FROM people p, relations r\n" +
+            "WHERE (r.personId1 = %1$d AND p.personId = r.personId2)\n" +
+            "      OR (r.personId2 = %1$d AND p.personId = r.personId1)\n" +
+            "      OR (((r.personId1 IS NULL AND r.personId2 = %1$d)\n" +
+            "           OR r.personId2 IS NULL AND r.personId1 = %1$d) AND p.personId = %1$d)";
 
 }

@@ -9,4 +9,5 @@
     <string name="person">Persoon</string>
     <string name="something_went_wrong">Er is iets mis gegaan</string>
     <string name="no_parents">Geen ouders</string>
+    <string name="no_relations">Geen relaties</string>
 </resources>
