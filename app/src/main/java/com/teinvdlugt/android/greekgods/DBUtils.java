@@ -55,4 +55,12 @@ public class DBUtils {
             "      OR (((r.personId1 IS NULL AND r.personId2 = %1$d)\n" +
             "           OR r.personId2 IS NULL AND r.personId1 = %1$d) AND p.personId = %1$d)";
 
+    /**
+     * Format this String using one argument, being the relationId of the relation
+     * you want to get the children from
+     */
+    public static final String BIRTHS_QUERY = "SELECT p.personId, p.name\n" +
+            "FROM people p, births b\n" +
+            "WHERE b.relationId = %1$d AND p.personId = b.personId";
+
 }

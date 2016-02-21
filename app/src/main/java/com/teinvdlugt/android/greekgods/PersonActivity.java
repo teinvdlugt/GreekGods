@@ -30,7 +30,9 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PersonActivity extends AppCompatActivity {
     public static final String PERSON_ID_EXTRA = "person_id";
@@ -62,7 +64,7 @@ public class PersonActivity extends AppCompatActivity {
         new AsyncTask<Void, Void, Void>() {
             private String name;
             private List<String> parents;
-            private List<String> relations;
+            private Map<String, List<String>> relationsAndChildren = new HashMap<>();
 
             @Override
             protected Void doInBackground(Void... params) {
@@ -100,21 +102,42 @@ public class PersonActivity extends AppCompatActivity {
                 }
 
                 // Relations
+                Map<String, Integer> relations = new HashMap<>();
                 try {
                     String relationsQuery = String.format(DBUtils.RELATIONS_QUERY, personId);
                     c = db.rawQuery(relationsQuery, null);
                     int nameColumn = c.getColumnIndex("name");
                     int relationIdColumn = c.getColumnIndex("relatiod_id");
                     c.moveToFirst();
-                    relations = new ArrayList<>();
                     do {
-                        relations.add(c.getString(nameColumn));
+                        relations.put(c.getString(nameColumn), c.getInt(relationIdColumn));
                     } while (c.moveToNext());
                 } catch (SQLiteException e) {
                     e.printStackTrace();
                 } catch (CursorIndexOutOfBoundsException ignored) {
                 } finally {
                     if (c != null) c.close();
+                }
+
+                // Children
+                for (String partnerName : relations.keySet()) {
+                    List<String> children = new ArrayList<>();
+                    try {
+                        String birthsQuery = String.format(DBUtils.BIRTHS_QUERY, relations.get(partnerName));
+                        c = db.rawQuery(birthsQuery, null);
+                        int nameColumn = c.getColumnIndex("name");
+                        c.moveToFirst();
+                        do {
+                            children.add(c.getString(nameColumn));
+                        } while (c.moveToNext());
+                    } catch (SQLiteException e) {
+                        e.printStackTrace();
+                    } catch (CursorIndexOutOfBoundsException ignored) {
+                    } finally {
+                        if (c != null) c.close();
+                    }
+
+                    relationsAndChildren.put(partnerName, children);
                 }
 
                 db.close();
@@ -136,12 +159,15 @@ public class PersonActivity extends AppCompatActivity {
                     sb.delete(sb.length() - 2, sb.length());
                     parentsTextView.setText(sb);
                 }
-                if (relations == null || relations.isEmpty()) {
+                if (relationsAndChildren == null || relationsAndChildren.isEmpty()) {
                     relationsTextView.setText(R.string.no_relations);
                 } else {
                     StringBuilder sb = new StringBuilder();
-                    for (String relation : relations) {
-                        sb.append(relation).append("\n");
+                    for (String partnerName : relationsAndChildren.keySet()) {
+                        sb.append(partnerName).append("\n");
+                        for (String childName : relationsAndChildren.get(partnerName)) {
+                            sb.append("\t\t").append(childName).append("\n");
+                        }
                     }
                     sb.delete(sb.length() - 1, sb.length());
                     relationsTextView.setText(sb);
