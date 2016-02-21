@@ -36,6 +36,7 @@ import android.text.style.ClickableSpan;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.teinvdlugt.android.greekgods.models.Person;
 
@@ -74,7 +75,7 @@ public class PersonActivity extends AppCompatActivity {
         new AsyncTask<Void, Void, Void>() {
             private String name;
             private List<Person> parents;
-            private Map<String, List<String>> relationsAndChildren = new HashMap<>();
+            private Map<Person, List<Person>> relationsAndChildren = new HashMap<>();
 
             @SuppressLint("DefaultLocale")
             @Override
@@ -136,14 +137,18 @@ public class PersonActivity extends AppCompatActivity {
 
                 // Children
                 for (String partnerName : relations.keySet()) {
-                    List<String> children = new ArrayList<>();
+                    List<Person> children = new ArrayList<>();
                     try {
                         String birthsQuery = String.format(DBUtils.BIRTHS_QUERY, relations.get(partnerName));
                         c = db.rawQuery(birthsQuery, null);
                         int nameColumn = c.getColumnIndex("name");
+                        int idColumn = c.getColumnIndex("personId");
                         c.moveToFirst();
                         do {
-                            children.add(c.getString(nameColumn));
+                            Person child = new Person();
+                            child.setName(c.getString(nameColumn));
+                            child.setId(c.getInt(idColumn));
+                            children.add(child);
                         } while (c.moveToNext());
                     } catch (SQLiteException e) {
                         e.printStackTrace();
@@ -152,7 +157,9 @@ public class PersonActivity extends AppCompatActivity {
                         if (c != null) c.close();
                     }
 
-                    relationsAndChildren.put(partnerName, children);
+                    Person partner = new Person();
+                    partner.setName(partnerName);
+                    relationsAndChildren.put(partner, children);
                 }
 
                 db.close();
@@ -167,35 +174,62 @@ public class PersonActivity extends AppCompatActivity {
                 if (parents == null || parents.isEmpty()) {
                     parentsTextView.setText(R.string.no_parents);
                 } else {
-                    SpannableStringBuilder ssb = new SpannableStringBuilder();
-                    for (final Person parent : parents) {
-                        ClickableSpan cs = new ClickableSpan() {
-                            @Override
-                            public void onClick(View widget) {
-                                openActivity(PersonActivity.this, parent.getId());
-                            }
-                        };
-                        ssb.append(parent.getName()).append(", ");
-                        ssb.setSpan(cs, ssb.length() - parent.getName().length() - 2,
-                                ssb.length() - 2, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-                    }
-                    ssb.delete(ssb.length() - 2, ssb.length());
-                    parentsTextView.setText(ssb);
-                    parentsTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                    setParentTexts();
                 }
                 if (relationsAndChildren == null || relationsAndChildren.isEmpty()) {
                     relationsTextView.setText(R.string.no_relations);
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    for (String partnerName : relationsAndChildren.keySet()) {
-                        sb.append(partnerName).append("\n");
-                        for (String childName : relationsAndChildren.get(partnerName)) {
-                            sb.append("\t\t").append(childName).append("\n");
-                        }
-                    }
-                    sb.delete(sb.length() - 1, sb.length());
-                    relationsTextView.setText(sb);
+                    setRelationsAndChildrenTexts();
                 }
+            }
+
+            private void setParentTexts() {
+                SpannableStringBuilder ssb = new SpannableStringBuilder();
+                for (final Person parent : parents) {
+                    ClickableSpan cs = new ClickableSpan() {
+                        @Override
+                        public void onClick(View widget) {
+                            openActivity(PersonActivity.this, parent.getId());
+                        }
+                    };
+                    ssb.append(parent.getName()).append(", ");
+                    ssb.setSpan(cs, ssb.length() - parent.getName().length() - 2,
+                            ssb.length() - 2, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                }
+                ssb.delete(ssb.length() - 2, ssb.length());
+                parentsTextView.setText(ssb);
+                parentsTextView.setMovementMethod(LinkMovementMethod.getInstance());
+            }
+
+            private void setRelationsAndChildrenTexts() {
+                SpannableStringBuilder ssb = new SpannableStringBuilder();
+                for (final Person partner : relationsAndChildren.keySet()) {
+                    ClickableSpan cs = new ClickableSpan() {
+                        @Override
+                        public void onClick(View widget) {
+                            Toast.makeText(PersonActivity.this, "You clicked on the relation with " +
+                                    partner.getName(), Toast.LENGTH_SHORT).show();
+                        }
+                    };
+                    ssb.append(partner.getName()).append("\n");
+                    ssb.setSpan(cs, ssb.length() - partner.getName().length() - 1,
+                            ssb.length() - 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+                    for (final Person child : relationsAndChildren.get(partner)) {
+                        ClickableSpan cs2 = new ClickableSpan() {
+                            @Override
+                            public void onClick(View widget) {
+                                openActivity(PersonActivity.this, child.getId());
+                            }
+                        };
+                        ssb.append("\t\t").append(child.getName()).append("\n");
+                        ssb.setSpan(cs2, ssb.length() - child.getName().length() - 1,
+                                ssb.length() - 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    }
+                }
+                ssb.delete(ssb.length() - 1, ssb.length());
+                relationsTextView.setText(ssb);
+                relationsTextView.setMovementMethod(LinkMovementMethod.getInstance());
             }
         }.execute();
     }
