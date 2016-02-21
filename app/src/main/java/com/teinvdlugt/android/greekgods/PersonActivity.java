@@ -49,6 +49,7 @@ public class PersonActivity extends AppCompatActivity {
     public static final String PERSON_ID_EXTRA = "person_id";
 
     private TextView parentsTextView, relationsTextView;
+    private TextView descriptionTV, shortDescriptionTV;
     private int personId;
 
     @SuppressWarnings("ConstantConditions")
@@ -62,6 +63,8 @@ public class PersonActivity extends AppCompatActivity {
         personId = getIntent().getIntExtra(PERSON_ID_EXTRA, -1);
         parentsTextView = (TextView) findViewById(R.id.parents_textView);
         relationsTextView = (TextView) findViewById(R.id.relations_textView);
+        descriptionTV = (TextView) findViewById(R.id.description_textView);
+        shortDescriptionTV = (TextView) findViewById(R.id.shortDescription_textView);
 
         if (personId != -1) {
             refresh();
@@ -74,6 +77,7 @@ public class PersonActivity extends AppCompatActivity {
     private void refresh() {
         new AsyncTask<Void, Void, Void>() {
             private String name;
+            private String description, shortDescription;
             private List<Person> parents;
             private Map<Person, List<Person>> relationsAndChildren = new HashMap<>();
 
@@ -83,13 +87,15 @@ public class PersonActivity extends AppCompatActivity {
                 SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
                 Cursor c = null;
 
-                // Person's name
+                // Person's name and description
                 try {
-                    String[] nameColumns = {"name"};
+                    String[] nameColumns = {"name", "shortDescription", "description"};
                     String[] selectionArgs = {String.valueOf(personId)};
                     c = db.query("people", nameColumns, "personId=?", selectionArgs, null, null, null);
                     c.moveToFirst();
                     name = c.getString(c.getColumnIndex("name"));
+                    description = c.getString(c.getColumnIndex("description"));
+                    shortDescription = c.getString(c.getColumnIndex("shortDescription"));
                 } catch (SQLiteException e) {
                     e.printStackTrace();
                 } finally {
@@ -170,6 +176,16 @@ public class PersonActivity extends AppCompatActivity {
             protected void onPostExecute(Void aVoid) {
                 if (name != null) {
                     setTitle(name);
+                }
+                if (shortDescription != null) {
+                    shortDescriptionTV.setText(shortDescription);
+                } else {
+                    shortDescriptionTV.setVisibility(View.GONE);
+                }
+                if (description != null) {
+                    descriptionTV.setText(description);
+                } else {
+                    descriptionTV.setVisibility(View.GONE);
                 }
                 if (parents == null || parents.isEmpty()) {
                     parentsTextView.setText(R.string.no_parents);
