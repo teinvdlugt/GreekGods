@@ -71,4 +71,9 @@ public class Person {
     public void setRelations(List<Relation> relations) {
         this.relations = relations;
     }
+
+    @Override
+    public String toString() {
+        return this.name + "@" + this.id;
+    }
 }

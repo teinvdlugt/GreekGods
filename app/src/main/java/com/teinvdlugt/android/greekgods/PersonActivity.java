@@ -16,6 +16,9 @@
  */
 package com.teinvdlugt.android.greekgods;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
@@ -26,8 +29,15 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
+
+import com.teinvdlugt.android.greekgods.models.Person;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,9 +73,10 @@ public class PersonActivity extends AppCompatActivity {
     private void refresh() {
         new AsyncTask<Void, Void, Void>() {
             private String name;
-            private List<String> parents;
+            private List<Person> parents;
             private Map<String, List<String>> relationsAndChildren = new HashMap<>();
 
+            @SuppressLint("DefaultLocale")
             @Override
             protected Void doInBackground(Void... params) {
                 SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
@@ -89,10 +100,14 @@ public class PersonActivity extends AppCompatActivity {
                     String parentsQuery = String.format(DBUtils.PARENTS_QUERY, personId);
                     c = db.rawQuery(parentsQuery, null);
                     int nameColumn = c.getColumnIndex("name");
+                    int idColumn = c.getColumnIndex("personId");
                     c.moveToFirst();
                     parents = new ArrayList<>();
                     do {
-                        parents.add(c.getString(nameColumn));
+                        Person p = new Person();
+                        p.setId(c.getInt(idColumn));
+                        p.setName(c.getString(nameColumn));
+                        parents.add(p);
                     } while (c.moveToNext());
                 } catch (SQLiteException e) {
                     e.printStackTrace();
@@ -152,12 +167,21 @@ public class PersonActivity extends AppCompatActivity {
                 if (parents == null || parents.isEmpty()) {
                     parentsTextView.setText(R.string.no_parents);
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    for (String parent : parents) {
-                        sb.append(parent).append(", ");
+                    SpannableStringBuilder ssb = new SpannableStringBuilder();
+                    for (final Person parent : parents) {
+                        ClickableSpan cs = new ClickableSpan() {
+                            @Override
+                            public void onClick(View widget) {
+                                openActivity(PersonActivity.this, parent.getId());
+                            }
+                        };
+                        ssb.append(parent.getName()).append(", ");
+                        ssb.setSpan(cs, ssb.length() - parent.getName().length() - 2,
+                                ssb.length() - 2, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                     }
-                    sb.delete(sb.length() - 2, sb.length());
-                    parentsTextView.setText(sb);
+                    ssb.delete(ssb.length() - 2, ssb.length());
+                    parentsTextView.setText(ssb);
+                    parentsTextView.setMovementMethod(LinkMovementMethod.getInstance());
                 }
                 if (relationsAndChildren == null || relationsAndChildren.isEmpty()) {
                     relationsTextView.setText(R.string.no_relations);
@@ -183,5 +207,11 @@ public class PersonActivity extends AppCompatActivity {
             return true;
         }
         return false;
+    }
+
+    public static void openActivity(Context context, int personId) {
+        Intent intent = new Intent(context, PersonActivity.class);
+        intent.putExtra(PERSON_ID_EXTRA, personId);
+        context.startActivity(intent);
     }
 }

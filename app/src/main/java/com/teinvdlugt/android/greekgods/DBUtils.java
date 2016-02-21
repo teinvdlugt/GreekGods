@@ -21,7 +21,7 @@ public class DBUtils {
      * Format this String using one argument, being the id
      * of the person you want to know the parents of
      */
-    public static final String PARENTS_QUERY = "SELECT p.name\n" +
+    public static final String PARENTS_QUERY = "SELECT p.personId, p.name\n" +
             "FROM people p\n" +
             "WHERE (p.personId IN (\n" +
             "  SELECT r.personId1\n" +
