@@ -10,4 +10,5 @@
     <string name="something_went_wrong">Er is iets mis gegaan</string>
     <string name="no_parents">Geen ouders</string>
     <string name="no_relations">Geen relaties</string>
+    <string name="single_relation_text">%s in zijn/haar eentje</string>
 </resources>

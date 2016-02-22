@@ -19,6 +19,46 @@ package com.teinvdlugt.android.greekgods.models;
 public class Relation {
     private String description;
     private Person person1, person2;
+    private int id;
 
-    public enum RelationType {CHILD, PARENT, HUSBAND, AFFAIR}
+    public enum RelationType {MARRIAGE, AFFAIR, SINGLE}
+
+    public Relation() {
+    }
+
+    public Relation(int id) {
+        this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Person getPerson1() {
+        return person1;
+    }
+
+    public void setPerson1(Person person1) {
+        this.person1 = person1;
+    }
+
+    public Person getPerson2() {
+        return person2;
+    }
+
+    public void setPerson2(Person person2) {
+        this.person2 = person2;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

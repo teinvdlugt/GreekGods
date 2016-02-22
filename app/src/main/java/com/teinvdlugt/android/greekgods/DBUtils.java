@@ -45,7 +45,7 @@ public class DBUtils {
      * Format this String using one argument, being the id of
      * the person you want to know the relations of
      */
-    public static final String RELATIONS_QUERY = "SELECT\n" +
+    public static final String RELATIONS_OF_PERSON_QUERY = "SELECT\n" +
             "  p.personId,\n" +
             "  p.name,\n" +
             "  r.relatiod_id\n" +
@@ -62,5 +62,23 @@ public class DBUtils {
     public static final String BIRTHS_QUERY = "SELECT p.personId, p.name\n" +
             "FROM people p, births b\n" +
             "WHERE b.relationId = %1$d AND p.personId = b.personId";
+
+    /**
+     * Format this String using one argument, being the personId of the person
+     * you want to get the parent relations of.
+     */
+    public static final String PARENTS_RELATIONS_QUERY = "SELECT b.relationId\n" +
+            "FROM births b\n" +
+            "WHERE b.personId = %d";
+
+    /**
+     * Format this String using one argument, being a relationId.
+     */
+    public static final String NAMES_OF_RELATION_QUERY = "SELECT p.name\n" +
+            "FROM people p, relations r\n" +
+            "WHERE r.relatiod_id = %d AND (\n" +
+            "  p.personId = r.personId1 OR\n" +
+            "  p.personId = r.personId2\n" +
+            ")";
 
 }

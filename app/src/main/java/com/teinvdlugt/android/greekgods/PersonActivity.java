@@ -39,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.teinvdlugt.android.greekgods.models.Person;
+import com.teinvdlugt.android.greekgods.models.Relation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,7 +79,7 @@ public class PersonActivity extends AppCompatActivity {
         new AsyncTask<Void, Void, Void>() {
             private String name;
             private String description, shortDescription;
-            private List<Person> parents;
+            private Map<Relation, List<String>> parents;
             private Map<Person, List<Person>> relationsAndChildren = new HashMap<>();
 
             @SuppressLint("DefaultLocale")
@@ -103,30 +104,39 @@ public class PersonActivity extends AppCompatActivity {
                 }
 
                 // Parents
+                parents = new HashMap<>();
+                Cursor c2 = null;
                 try {
-                    String parentsQuery = String.format(DBUtils.PARENTS_QUERY, personId);
-                    c = db.rawQuery(parentsQuery, null);
-                    int nameColumn = c.getColumnIndex("name");
-                    int idColumn = c.getColumnIndex("personId");
+                    String parentRelationsQuery = String.format(DBUtils.PARENTS_RELATIONS_QUERY, personId);
+                    c = db.rawQuery(parentRelationsQuery, null);
+                    int idColumn = c.getColumnIndex("relationId");
                     c.moveToFirst();
-                    parents = new ArrayList<>();
                     do {
-                        Person p = new Person();
-                        p.setId(c.getInt(idColumn));
-                        p.setName(c.getString(nameColumn));
-                        parents.add(p);
+                        int relationId = c.getInt(idColumn);
+                        Relation relation = new Relation(relationId);
+                        List<String> parentNames = new ArrayList<>();
+                        String relationNamesQuery = String.format(DBUtils.NAMES_OF_RELATION_QUERY, relationId);
+                        c2 = db.rawQuery(relationNamesQuery, null);
+                        int nameColumn = c2.getColumnIndex("name");
+                        c2.moveToFirst();
+                        do {
+                            parentNames.add(c2.getString(nameColumn));
+                        } while (c2.moveToNext());
+                        c2.close();
+                        parents.put(relation, parentNames);
                     } while (c.moveToNext());
                 } catch (SQLiteException e) {
                     e.printStackTrace();
                 } catch (CursorIndexOutOfBoundsException ignored) {
                 } finally {
                     if (c != null) c.close();
+                    if (c2 != null) c2.close();
                 }
 
                 // Relations
                 Map<String, Integer> relations = new HashMap<>();
                 try {
-                    String relationsQuery = String.format(DBUtils.RELATIONS_QUERY, personId);
+                    String relationsQuery = String.format(DBUtils.RELATIONS_OF_PERSON_QUERY, personId);
                     c = db.rawQuery(relationsQuery, null);
                     int nameColumn = c.getColumnIndex("name");
                     int relationIdColumn = c.getColumnIndex("relatiod_id");
@@ -201,18 +211,26 @@ public class PersonActivity extends AppCompatActivity {
 
             private void setParentTexts() {
                 SpannableStringBuilder ssb = new SpannableStringBuilder();
-                for (final Person parent : parents) {
+                for (final Relation relation : parents.keySet()) {
                     ClickableSpan cs = new ClickableSpan() {
                         @Override
                         public void onClick(View widget) {
-                            openActivity(PersonActivity.this, parent.getId());
+                            Toast.makeText(PersonActivity.this, "You clicked on the relation with id " +
+                                    relation.getId(), Toast.LENGTH_SHORT).show();
                         }
                     };
-                    ssb.append(parent.getName()).append(", ");
-                    ssb.setSpan(cs, ssb.length() - parent.getName().length() - 2,
-                            ssb.length() - 2, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                    List<String> parentNames = parents.get(relation);
+                    StringBuilder relationText = new StringBuilder();
+                    for (int i = 0; i < parentNames.size(); i++) {
+                        if (i != 0) relationText.append(" & ");
+                        relationText.append(parentNames.get(i));
+                    }
+                    ssb.append(relationText);
+                    ssb.setSpan(cs, ssb.length() - relationText.length(),
+                            ssb.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                    ssb.append("\n");
                 }
-                ssb.delete(ssb.length() - 2, ssb.length());
+                ssb.delete(ssb.length() - 1, ssb.length());
                 parentsTextView.setText(ssb);
                 parentsTextView.setMovementMethod(LinkMovementMethod.getInstance());
             }
@@ -227,8 +245,14 @@ public class PersonActivity extends AppCompatActivity {
                                     partner.getName(), Toast.LENGTH_SHORT).show();
                         }
                     };
-                    ssb.append(partner.getName()).append("\n");
-                    ssb.setSpan(cs, ssb.length() - partner.getName().length() - 1,
+                    String text;
+                    if (partner.getId() == personId) {
+                        text = getString(R.string.single_relation_text, name);
+                    } else {
+                        text = name + " & " + partner.getName();
+                    }
+                    ssb.append(text).append("\n");
+                    ssb.setSpan(cs, ssb.length() - text.length() - 1,
                             ssb.length() - 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
                     for (final Person child : relationsAndChildren.get(partner)) {
