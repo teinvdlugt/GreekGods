@@ -49,7 +49,7 @@ public class PersonActivity extends AppCompatActivity {
     public static final String PERSON_ID_EXTRA = "person_id";
 
     private TextView parentsTextView, relationsTextView;
-    private TextView descriptionTV, shortDescriptionTV;
+    private TextView descriptionTV;
     private int personId;
 
     @SuppressWarnings("ConstantConditions")
@@ -64,7 +64,6 @@ public class PersonActivity extends AppCompatActivity {
         parentsTextView = (TextView) findViewById(R.id.parents_textView);
         relationsTextView = (TextView) findViewById(R.id.relations_textView);
         descriptionTV = (TextView) findViewById(R.id.description_textView);
-        shortDescriptionTV = (TextView) findViewById(R.id.shortDescription_textView);
 
         if (personId != -1) {
             refresh();
@@ -188,9 +187,7 @@ public class PersonActivity extends AppCompatActivity {
                     setTitle(name);
                 }
                 if (shortDescription != null) {
-                    shortDescriptionTV.setText(shortDescription);
-                } else {
-                    shortDescriptionTV.setVisibility(View.GONE);
+                    getSupportActionBar().setSubtitle(shortDescription);
                 }
                 if (description != null) {
                     descriptionTV.setText(description);

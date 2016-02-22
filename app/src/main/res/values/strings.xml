@@ -5,7 +5,7 @@
     <string name="refreshing_database">Database verversen…</string>
     <string name="refresh_database_done">Database ververst!</string>
     <string name="parents">Ouders</string>
-    <string name="relations_and_children">Relaties en kinderen</string>
+    <string name="relations_and_children">Nakomelingen per relatie</string>
     <string name="person">Persoon</string>
     <string name="something_went_wrong">Er is iets mis gegaan</string>
     <string name="no_parents">Geen ouders</string>
