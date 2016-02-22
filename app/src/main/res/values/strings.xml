@@ -11,4 +11,16 @@
     <string name="no_parents">Geen ouders</string>
     <string name="no_relations">Geen relaties</string>
     <string name="single_relation_text">%s in zijn/haar eentje</string>
+    <string name="relation">Relatie</string>
+    <string name="people">Personen</string>
+    <string name="description">Beschrijving</string>
+    <string name="offspring">Nageslacht</string>
+    <string name="relation_type">Type</string>
+    <string name="no_offspring">Uit deze relatie volgden geen nakomelingen.</string>
+    <string name="relation_type_marriage">Officieel</string>
+    <string name="relation_type_affair">Affaire</string>
+    <string name="relation_type_single">Eén persoon</string>
+    <string name="unknown">Onbekend</string>
+    <string name="relation_colon">Relatie: %s</string>
+    <string name="no_description_available">Geen beschrijving beschikbaar</string>
 </resources>

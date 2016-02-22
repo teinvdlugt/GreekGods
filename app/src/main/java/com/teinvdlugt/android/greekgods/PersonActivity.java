@@ -36,7 +36,6 @@ import android.text.style.ClickableSpan;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.teinvdlugt.android.greekgods.models.Person;
 import com.teinvdlugt.android.greekgods.models.Relation;
@@ -80,7 +79,7 @@ public class PersonActivity extends AppCompatActivity {
             private String name;
             private String description, shortDescription;
             private Map<Relation, List<String>> parents;
-            private Map<Person, List<Person>> relationsAndChildren = new HashMap<>();
+            private Map<Relation, List<Person>> relationsAndChildren = new HashMap<>();
 
             @SuppressLint("DefaultLocale")
             @Override
@@ -134,48 +133,49 @@ public class PersonActivity extends AppCompatActivity {
                 }
 
                 // Relations
-                Map<String, Integer> relations = new HashMap<>();
                 try {
                     String relationsQuery = String.format(DBUtils.RELATIONS_OF_PERSON_QUERY, personId);
                     c = db.rawQuery(relationsQuery, null);
-                    int nameColumn = c.getColumnIndex("name");
+                    int personNameColumn = c.getColumnIndex("name");
+                    int personIdColumn = c.getColumnIndex("personId");
                     int relationIdColumn = c.getColumnIndex("relatiod_id");
                     c.moveToFirst();
                     do {
-                        relations.put(c.getString(nameColumn), c.getInt(relationIdColumn));
+                        Person partner = new Person();
+                        partner.setId(c.getInt(personIdColumn));
+                        partner.setName(c.getString(personNameColumn));
+                        Relation relation = new Relation();
+                        relation.setId(c.getInt(relationIdColumn));
+                        relation.setPerson1(partner);
+
+                        List<Person> children = new ArrayList<>();
+                        try {
+                            String birthsQuery = String.format(DBUtils.BIRTHS_FROM_RELATION_QUERY, relation.getId());
+                            c2 = db.rawQuery(birthsQuery, null);
+                            int nameColumn = c2.getColumnIndex("name");
+                            int idColumn = c2.getColumnIndex("personId");
+                            c2.moveToFirst();
+                            do {
+                                Person child = new Person();
+                                child.setName(c2.getString(nameColumn));
+                                child.setId(c2.getInt(idColumn));
+                                children.add(child);
+                            } while (c2.moveToNext());
+                        } catch (SQLiteException e) {
+                            e.printStackTrace();
+                        } catch (CursorIndexOutOfBoundsException ignored) {
+                        } finally {
+                            if (c2 != null) c2.close();
+                        }
+
+                        relationsAndChildren.put(relation, children);
                     } while (c.moveToNext());
                 } catch (SQLiteException e) {
                     e.printStackTrace();
                 } catch (CursorIndexOutOfBoundsException ignored) {
                 } finally {
                     if (c != null) c.close();
-                }
-
-                // Children
-                for (String partnerName : relations.keySet()) {
-                    List<Person> children = new ArrayList<>();
-                    try {
-                        String birthsQuery = String.format(DBUtils.BIRTHS_QUERY, relations.get(partnerName));
-                        c = db.rawQuery(birthsQuery, null);
-                        int nameColumn = c.getColumnIndex("name");
-                        int idColumn = c.getColumnIndex("personId");
-                        c.moveToFirst();
-                        do {
-                            Person child = new Person();
-                            child.setName(c.getString(nameColumn));
-                            child.setId(c.getInt(idColumn));
-                            children.add(child);
-                        } while (c.moveToNext());
-                    } catch (SQLiteException e) {
-                        e.printStackTrace();
-                    } catch (CursorIndexOutOfBoundsException ignored) {
-                    } finally {
-                        if (c != null) c.close();
-                    }
-
-                    Person partner = new Person();
-                    partner.setName(partnerName);
-                    relationsAndChildren.put(partner, children);
+                    if (c2 != null) c2.close();
                 }
 
                 db.close();
@@ -211,12 +211,12 @@ public class PersonActivity extends AppCompatActivity {
 
             private void setParentTexts() {
                 SpannableStringBuilder ssb = new SpannableStringBuilder();
-                for (final Relation relation : parents.keySet()) {
+                for (Relation relation : parents.keySet()) {
+                    final int relationId = relation.getId();
                     ClickableSpan cs = new ClickableSpan() {
                         @Override
                         public void onClick(View widget) {
-                            Toast.makeText(PersonActivity.this, "You clicked on the relation with id " +
-                                    relation.getId(), Toast.LENGTH_SHORT).show();
+                            RelationActivity.openActivity(PersonActivity.this, relationId);
                         }
                     };
                     List<String> parentNames = parents.get(relation);
@@ -237,34 +237,39 @@ public class PersonActivity extends AppCompatActivity {
 
             private void setRelationsAndChildrenTexts() {
                 SpannableStringBuilder ssb = new SpannableStringBuilder();
-                for (final Person partner : relationsAndChildren.keySet()) {
+                for (Relation relation : relationsAndChildren.keySet()) {
+                    final int relationId = relation.getId();
                     ClickableSpan cs = new ClickableSpan() {
                         @Override
                         public void onClick(View widget) {
-                            Toast.makeText(PersonActivity.this, "You clicked on the relation with " +
-                                    partner.getName(), Toast.LENGTH_SHORT).show();
+                            RelationActivity.openActivity(PersonActivity.this, relationId);
                         }
                     };
+
                     String text;
-                    if (partner.getId() == personId) {
+                    if (relation.getPerson1().getId() == personId) {
                         text = getString(R.string.single_relation_text, name);
                     } else {
-                        text = name + " & " + partner.getName();
+                        text = name + " & " + relation.getPerson1().getName();
                     }
-                    ssb.append(text).append("\n");
-                    ssb.setSpan(cs, ssb.length() - text.length() - 1,
-                            ssb.length() - 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
-                    for (final Person child : relationsAndChildren.get(partner)) {
+                    ssb.append(text);
+                    ssb.setSpan(cs, ssb.length() - text.length(),
+                            ssb.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                    ssb.append("\n");
+
+                    for (Person child : relationsAndChildren.get(relation)) {
+                        final int childId = child.getId();
                         ClickableSpan cs2 = new ClickableSpan() {
                             @Override
                             public void onClick(View widget) {
-                                openActivity(PersonActivity.this, child.getId());
+                                openActivity(PersonActivity.this, childId);
                             }
                         };
-                        ssb.append("\t\t").append(child.getName()).append("\n");
-                        ssb.setSpan(cs2, ssb.length() - child.getName().length() - 1,
-                                ssb.length() - 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        ssb.append("\t\t").append(child.getName());
+                        ssb.setSpan(cs2, ssb.length() - child.getName().length(),
+                                ssb.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        ssb.append("\n");
                     }
                 }
                 ssb.delete(ssb.length() - 1, ssb.length());

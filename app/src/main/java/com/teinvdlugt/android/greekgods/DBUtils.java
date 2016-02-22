@@ -59,7 +59,7 @@ public class DBUtils {
      * Format this String using one argument, being the relationId of the relation
      * you want to get the children from
      */
-    public static final String BIRTHS_QUERY = "SELECT p.personId, p.name\n" +
+    public static final String BIRTHS_FROM_RELATION_QUERY = "SELECT p.personId, p.name\n" +
             "FROM people p, births b\n" +
             "WHERE b.relationId = %1$d AND p.personId = b.personId";
 
@@ -80,5 +80,9 @@ public class DBUtils {
             "  p.personId = r.personId1 OR\n" +
             "  p.personId = r.personId2\n" +
             ")";
+
+    public static final String NAMES_OF_TWO_PEOPLE_QUERY = "SELECT p.personId, p.name\n" +
+            "FROM people p\n" +
+            "WHERE p.personId = %1$d OR p.personId = %2$d";
 
 }

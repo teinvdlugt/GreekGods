@@ -26,6 +26,10 @@
         <activity
             android:name=".PersonActivity"
             android:label="@string/person" />
+
+        <activity
+            android:name=".RelationActivity"
+            android:label="@string/relation" />
     </application>
 
 </manifest>
