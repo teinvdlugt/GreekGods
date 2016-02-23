@@ -23,4 +23,6 @@
     <string name="unknown">Onbekend</string>
     <string name="relation_colon">Relatie: %s</string>
     <string name="no_description_available">Geen beschrijving beschikbaar</string>
+    <string name="search">Zoeken</string>
+    <string name="search_in_people">Zoeken in personen</string>
 </resources>
