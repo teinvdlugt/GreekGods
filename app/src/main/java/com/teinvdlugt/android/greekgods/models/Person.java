@@ -22,6 +22,7 @@ public class Person {
     private String name;
     private String description, shortDescription;
     private List<Relation> relations;
+    private Person parent1, parent2;
     private int id;
 
     public Person(String name, List<Relation> relations) {
@@ -62,6 +63,22 @@ public class Person {
 
     public void setShortDescription(String shortDescription) {
         this.shortDescription = shortDescription;
+    }
+
+    public Person getParent1() {
+        return parent1;
+    }
+
+    public void setParent1(Person parent1) {
+        this.parent1 = parent1;
+    }
+
+    public Person getParent2() {
+        return parent2;
+    }
+
+    public void setParent2(Person parent2) {
+        this.parent2 = parent2;
     }
 
     public List<Relation> getRelations() {

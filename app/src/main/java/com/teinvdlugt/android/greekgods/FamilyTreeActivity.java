@@ -13,11 +13,18 @@ public class FamilyTreeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_family_tree);
 
-        FamilyTreeNode treeNode = (FamilyTreeNode) findViewById(R.id.family_tree_node);
-        Person p = new Person();
-        p.setName("Chaos");
-        p.setId(1);
-        p.setShortDescription("Het Niets");
-        treeNode.setPerson(p);
+        FamilyTreeLayout treeLayout = (FamilyTreeLayout) findViewById(R.id.family_tree_layout);
+        Person person = new Person();
+        person.setName("Zeus");
+        person.setShortDescription("Oppergod van Olympus");
+        Person parent1 = new Person();
+        parent1.setName("Rhea");
+        parent1.setShortDescription("Titaan");
+        Person parent2 = new Person();
+        parent2.setName("Kronos");
+        parent2.setShortDescription("Titaan");
+        person.setParent1(parent1);
+        person.setParent2(parent2);
+        treeLayout.setPerson(person);
     }
 }
