@@ -46,23 +46,41 @@ public class FamilyTreeLayout extends LinearLayout {
         LayoutParams marginParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         marginParams.bottomMargin = marginParams.topMargin = marginParams.leftMargin = marginParams.rightMargin = 16;
 
+        // Parents
         LinearLayout parentsLayout = new LinearLayout(getContext());
+        if (person.getParents() != null)
+            for (final Person parent : person.getParents()) {
+                FamilyTreeNode parentView = new FamilyTreeNode(getContext());
+                parentView.setPerson(parent);
+                parentsLayout.addView(parentView, marginParams);
+                parentView.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (onPersonClickListener != null)
+                            onPersonClickListener.onClickPerson(parent);
+                    }
+                });
+            }
 
-        for (final Person parent : person.getParents()) {
-            FamilyTreeNode parentView = new FamilyTreeNode(getContext());
-            parentView.setPerson(parent);
-            parentsLayout.addView(parentView, marginParams);
-            parentView.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (onPersonClickListener != null)
-                        onPersonClickListener.onClickPerson(parent);
-                }
-            });
-        }
+        // Children
+        LinearLayout childrenLayout = new LinearLayout(getContext());
+        if (person.getChildren() != null)
+            for (final Person child : person.getChildren()) {
+                FamilyTreeNode childView = new FamilyTreeNode(getContext());
+                childView.setPerson(child);
+                childrenLayout.addView(childView, marginParams);
+                childView.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (onPersonClickListener != null)
+                            onPersonClickListener.onClickPerson(child);
+                    }
+                });
+            }
 
         addView(parentsLayout, wrapParams);
         addView(personView, marginParams);
+        addView(childrenLayout, wrapParams);
     }
 
     public Person getPerson() {

@@ -26,9 +26,9 @@ public class Person {
     private List<Person> parents;
     private int id;
 
-    public Person(String name, List<Relation> relations) {
+    public Person(int id, String name) {
+        this.id = id;
         this.name = name;
-        this.relations = relations;
     }
 
     public Person() {

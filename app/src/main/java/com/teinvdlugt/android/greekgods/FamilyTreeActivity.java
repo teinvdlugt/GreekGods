@@ -55,14 +55,65 @@ public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeL
         new AsyncTask<Void, Void, Person>() {
             @Override
             protected Person doInBackground(Void... params) {
+                // TODO Optimise everything
                 Person person = getBasicPersonData(personId);
+
+                // Parents
                 List<Integer> parentIds = getParentIds(personId);
                 List<Person> parents = new ArrayList<>();
-                for (int parentId : parentIds) {
+                for (int parentId : parentIds)
                     parents.add(getBasicPersonData(parentId));
-                }
                 person.setParents(parents);
+
+                // Children
+                List<Integer> relationIds = getRelationIds(personId);
+                List<Integer> childrenIds = new ArrayList<>();
+                for (int relationId : relationIds)
+                    childrenIds.addAll(getChildrenIds(relationId));
+                List<Person> children = new ArrayList<>();
+                for (int childId : childrenIds)
+                    children.add(getBasicPersonData(childId));
+                person.setChildren(children);
+
                 return person;
+            }
+
+            private List<Integer> getRelationIds(int personId) {
+                List<Integer> result = new ArrayList<>();
+                Cursor c = null;
+
+                try {
+                    SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
+                    String query = String.format(DBUtils.RELATIONS_OF_PERSON_QUERY, personId);
+                    c = db.rawQuery(query, null);
+                    c.moveToFirst();
+                    int relationIdIndex = c.getColumnIndex("relatiod_id");
+                    do {
+                        result.add(c.getInt(relationIdIndex));
+                    } while (c.moveToNext());
+                } catch (CursorIndexOutOfBoundsException ignored) {
+                } finally { if (c != null) c.close(); }
+
+                return result;
+            }
+
+            private List<Integer> getChildrenIds(int relationId) {
+                List<Integer> result = new ArrayList<>();
+                Cursor c = null;
+
+                try {
+                    SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
+                    String query = String.format(DBUtils.BIRTHS_FROM_RELATION_QUERY, relationId);
+                    c = db.rawQuery(query, null);
+                    c.moveToFirst();
+                    int personIdIndex = c.getColumnIndex("personId");
+                    do {
+                        result.add(c.getInt(personIdIndex));
+                    } while (c.moveToNext());
+                } catch (CursorIndexOutOfBoundsException ignored) {
+                } finally { if (c != null) c.close(); }
+
+                return result;
             }
 
             @Deprecated
