@@ -192,7 +192,7 @@ public class PersonActivity extends AppCompatActivity {
                 if (description != null) {
                     descriptionTV.setText(description);
                 } else {
-                    descriptionTV.setVisibility(View.GONE);
+                    descriptionTV.setText(R.string.no_description_available);
                 }
                 if (parents == null || parents.isEmpty()) {
                     parentsTextView.setText(R.string.no_parents);
