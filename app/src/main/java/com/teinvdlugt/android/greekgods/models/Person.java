@@ -22,7 +22,8 @@ public class Person {
     private String name;
     private String description, shortDescription;
     private List<Relation> relations;
-    private Person parent1, parent2;
+    private List<Person> children;
+    private List<Person> parents;
     private int id;
 
     public Person(String name, List<Relation> relations) {
@@ -31,6 +32,10 @@ public class Person {
     }
 
     public Person() {
+    }
+
+    public Person(int id) {
+        this.id = id;
     }
 
     public int getId() {
@@ -65,20 +70,20 @@ public class Person {
         this.shortDescription = shortDescription;
     }
 
-    public Person getParent1() {
-        return parent1;
+    public List<Person> getParents() {
+        return parents;
     }
 
-    public void setParent1(Person parent1) {
-        this.parent1 = parent1;
+    public void setParents(List<Person> parents) {
+        this.parents = parents;
     }
 
-    public Person getParent2() {
-        return parent2;
+    public List<Person> getChildren() {
+        return children;
     }
 
-    public void setParent2(Person parent2) {
-        this.parent2 = parent2;
+    public void setChildren(List<Person> children) {
+        this.children = children;
     }
 
     public List<Relation> getRelations() {

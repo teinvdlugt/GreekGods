@@ -26,25 +26,25 @@ import com.teinvdlugt.android.greekgods.models.Person;
 public class FamilyTreeLayout extends LinearLayout {
 
     private Person person;
-    private FamilyTreeNode personView, parent1View, parent2View;
 
     public void setPerson(Person person) {
         this.person = person;
         removeAllViews();
-        personView = new FamilyTreeNode(getContext());
-        parent1View = new FamilyTreeNode(getContext());
-        parent2View = new FamilyTreeNode(getContext());
+        FamilyTreeNode personView = new FamilyTreeNode(getContext());
         personView.setPerson(person);
-        parent1View.setPerson(person.getParent1());
-        parent2View.setPerson(person.getParent2());
 
         LayoutParams wrapParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         LayoutParams marginParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         marginParams.bottomMargin = marginParams.topMargin = marginParams.leftMargin = marginParams.rightMargin = 16;
 
         LinearLayout parentsLayout = new LinearLayout(getContext());
-        parentsLayout.addView(parent1View, marginParams);
-        parentsLayout.addView(parent2View, marginParams);
+
+        for (Person parent : person.getParents()) {
+            FamilyTreeNode parentView = new FamilyTreeNode(getContext());
+            parentView.setPerson(parent);
+            parentsLayout.addView(parentView, marginParams);
+        }
+
         addView(parentsLayout, wrapParams);
         addView(personView, marginParams);
     }
