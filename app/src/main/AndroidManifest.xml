@@ -30,6 +30,9 @@
         <activity
             android:name=".RelationActivity"
             android:label="@string/relation" />
-    </application>
 
+        <activity
+            android:name=".FamilyTreeActivity"
+            android:label="@string/family_tree" />
+    </application>
 </manifest>

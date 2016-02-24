@@ -57,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
         fillDatabase();
     }
 
+    public void onClickFamilyTree(View view) {
+        startActivity(new Intent(this, FamilyTreeActivity.class));
+    }
+
     private void fillDatabase() {
         new AsyncTask<Void, Void, Void>() {
 

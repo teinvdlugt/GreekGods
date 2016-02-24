@@ -25,4 +25,5 @@
     <string name="no_description_available">Geen beschrijving beschikbaar</string>
     <string name="search">Zoeken</string>
     <string name="search_in_people">Zoeken in personen</string>
+    <string name="family_tree">Stamboom</string>
 </resources>

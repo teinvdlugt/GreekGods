@@ -46,6 +46,12 @@
                 android:layout_height="wrap_content"
                 android:onClick="onClickRefreshDatabase"
                 android:text="@string/refresh_database" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClickFamilyTree"
+                android:text="@string/family_tree" />
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 </android.support.design.widget.CoordinatorLayout>

@@ -20,6 +20,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -41,21 +43,36 @@ public class FamilyTreeNode extends CardView {
         description.setText(person.getShortDescription());
     }
 
-    public FamilyTreeNode(Context context) {
-        super(context);
-
-        LinearLayout ll = new LinearLayout(context);
-        ll.setOrientation(LinearLayout.VERTICAL);
+    private void init(Context context) {
+        LinearLayout content = new LinearLayout(context);
+        content.setOrientation(LinearLayout.VERTICAL);
+        int _16dp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
+        content.setPadding(_16dp, _16dp, _16dp, _16dp);
         title = new TextView(context);
         title.setTextSize(18);
         title.setTextColor(Color.BLACK);
+        title.setGravity(Gravity.CENTER_HORIZONTAL);
         description = new TextView(context);
         description.setTextSize(14);
+        description.setGravity(Gravity.CENTER_HORIZONTAL);
 
-        addView(ll);
+        content.addView(title);
+        content.addView(description);
+        addView(content);
+    }
+
+    public FamilyTreeNode(Context context) {
+        super(context);
+        init(context);
     }
 
     public FamilyTreeNode(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(context);
+    }
+
+    public FamilyTreeNode(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context);
     }
 }
