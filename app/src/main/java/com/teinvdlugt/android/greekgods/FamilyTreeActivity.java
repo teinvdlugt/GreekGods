@@ -14,9 +14,10 @@ import com.teinvdlugt.android.greekgods.models.Person;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FamilyTreeActivity extends AppCompatActivity {
+public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeLayout.OnPersonClickListener {
 
-    FamilyTreeLayout treeLayout;
+    private FamilyTreeLayout treeLayout;
+    private List<Integer> backStack = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -24,7 +25,29 @@ public class FamilyTreeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_family_tree);
 
         treeLayout = (FamilyTreeLayout) findViewById(R.id.family_tree_layout);
+        treeLayout.setOnPersonClickListener(this);
         loadPerson(64);
+    }
+
+    @Override
+    public void onClickPerson(Person person) {
+        if (person.getId() == treeLayout.getPerson().getId()) {
+            return;
+        }
+
+        backStack.add(treeLayout.getPerson().getId());
+        loadPerson(person.getId());
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (backStack != null && backStack.size() > 0) {
+            int id = backStack.get(backStack.size() - 1);
+            backStack.remove(backStack.size() - 1);
+            loadPerson(id);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @SuppressLint("DefaultLocale")
@@ -70,9 +93,11 @@ public class FamilyTreeActivity extends AppCompatActivity {
                     String[] columns = {"name", "shortDescription"};
                     String[] selectionArgs = {String.valueOf(id)};
                     c = db.query("people", columns, "personId=?", selectionArgs, null, null, null);
-                    c.moveToFirst();
-                    person.setName(c.getString(c.getColumnIndex("name")));
-                    person.setShortDescription(c.getString(c.getColumnIndex("shortDescription")));
+                    boolean bool = c.moveToFirst();
+                    int nameIndex = c.getColumnIndex("name");
+                    int shortDescIndex = c.getColumnIndex("shortDescription");
+                    person.setName(c.getString(nameIndex));
+                    person.setShortDescription(c.getString(shortDescIndex));
                 } finally {
                     if (c != null) c.close();
                 }
