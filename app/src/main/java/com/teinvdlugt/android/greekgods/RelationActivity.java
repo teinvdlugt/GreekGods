@@ -32,7 +32,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -192,7 +191,7 @@ public class RelationActivity extends AppCompatActivity {
                     if (i != 0) ssb.append("\n");
                     ssb.append(people.get(i).getName());
                     final int personId = people.get(i).getId();
-                    ClickableSpan cs = new ClickableSpan() {
+                    MyClickableSpan cs = new MyClickableSpan(RelationActivity.this) {
                         @Override
                         public void onClick(View widget) {
                             PersonActivity.openActivity(RelationActivity.this, personId);

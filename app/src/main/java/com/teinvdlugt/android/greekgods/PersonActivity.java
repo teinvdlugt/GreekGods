@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -32,7 +33,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -210,7 +211,7 @@ public class PersonActivity extends AppCompatActivity {
                 SpannableStringBuilder ssb = new SpannableStringBuilder();
                 for (Relation relation : parents.keySet()) {
                     final int relationId = relation.getId();
-                    ClickableSpan cs = new ClickableSpan() {
+                    MyClickableSpan cs = new MyClickableSpan(PersonActivity.this) {
                         @Override
                         public void onClick(View widget) {
                             RelationActivity.openActivity(PersonActivity.this, relationId);
@@ -236,7 +237,7 @@ public class PersonActivity extends AppCompatActivity {
                 SpannableStringBuilder ssb = new SpannableStringBuilder();
                 for (Relation relation : relationsAndChildren.keySet()) {
                     final int relationId = relation.getId();
-                    ClickableSpan cs = new ClickableSpan() {
+                    MyClickableSpan cs = new MyClickableSpan(PersonActivity.this) {
                         @Override
                         public void onClick(View widget) {
                             RelationActivity.openActivity(PersonActivity.this, relationId);
@@ -252,18 +253,27 @@ public class PersonActivity extends AppCompatActivity {
 
                     ssb.append(text);
                     ssb.setSpan(cs, ssb.length() - text.length(),
-                            ssb.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                            ssb.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                     ssb.append("\n");
 
-                    for (Person child : relationsAndChildren.get(relation)) {
+                    List<Person> children = relationsAndChildren.get(relation);
+                    for (int i = 0; i < children.size(); i++) {
+                        Person child = children.get(i);
                         final int childId = child.getId();
-                        ClickableSpan cs2 = new ClickableSpan() {
+                        MyClickableSpan cs2 = new MyClickableSpan(PersonActivity.this) {
                             @Override
                             public void onClick(View widget) {
                                 openActivity(PersonActivity.this, childId);
                             }
                         };
-                        ssb.append("\t\t").append(child.getName());
+
+                        if (i == children.size() - 1)
+                            ssb.append("\u2514\t");
+                        else
+                            ssb.append("\u251C\t");
+                        ssb.setSpan(new ForegroundColorSpan(Color.BLACK), ssb.length() - 2, ssb.length(),
+                                Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                        ssb.append(child.getName());
                         ssb.setSpan(cs2, ssb.length() - child.getName().length(),
                                 ssb.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                         ssb.append("\n");
