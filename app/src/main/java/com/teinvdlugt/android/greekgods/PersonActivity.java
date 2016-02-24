@@ -186,7 +186,7 @@ public class PersonActivity extends AppCompatActivity {
                 if (name != null) {
                     setTitle(name);
                 }
-                if (shortDescription != null) {
+                if (shortDescription != null && getSupportActionBar() != null) {
                     getSupportActionBar().setSubtitle(shortDescription);
                 }
                 if (description != null) {

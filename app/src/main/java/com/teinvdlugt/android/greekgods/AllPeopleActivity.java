@@ -16,10 +16,9 @@
  */
 package com.teinvdlugt.android.greekgods;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,6 +30,8 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.teinvdlugt.android.greekgods.models.Person;
 
@@ -40,6 +41,7 @@ import java.util.List;
 public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRecyclerViewAdapter.OnPersonClickListener {
 
     private AllPeopleRecyclerViewAdapter adapter;
+    private String searchQuery;
 
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -60,23 +62,32 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
         new AsyncTask<Void, Void, List<Person>>() {
             @Override
             protected List<Person> doInBackground(Void... params) {
-                SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
-                String[] columns = {"personId", "name"};
-                Cursor c = db.query("people", columns, null, null, null, null, "name");
-                int idColumn = c.getColumnIndex("personId");
-                int nameColumn = c.getColumnIndex("name");
+                if (searchQuery == null) searchQuery = "";
 
                 List<Person> result = new ArrayList<>();
 
-                c.moveToFirst();
-                do {
-                    Person p = new Person();
-                    p.setId(c.getInt(idColumn));
-                    p.setName(c.getString(nameColumn));
-                    result.add(p);
-                } while (c.moveToNext());
-                c.close();
-                db.close();
+                SQLiteDatabase db = null;
+                Cursor c = null;
+                try {
+                    db = openOrCreateDatabase("data", 0, null);
+                    String[] columns = {"personId", "name"};
+                    String selection = "name LIKE '" + searchQuery + "%'";
+                    c = db.query("people", columns, selection, null, null, null, "name");
+                    int idColumn = c.getColumnIndex("personId");
+                    int nameColumn = c.getColumnIndex("name");
+
+                    c.moveToFirst();
+                    do {
+                        Person p = new Person();
+                        p.setId(c.getInt(idColumn));
+                        p.setName(c.getString(nameColumn));
+                        result.add(p);
+                    } while (c.moveToNext());
+                } catch (CursorIndexOutOfBoundsException ignored) {
+                } finally {
+                    if (c != null) c.close();
+                    if (db != null) db.close();
+                }
 
                 return result;
             }
@@ -99,9 +110,21 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_search, menu);
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setQueryHint(getString(R.string.search_in_people));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                searchQuery = newText;
+                refresh();
+                return true;
+            }
+        });
 
         return true;
     }
@@ -109,10 +132,27 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish();
-
+            onBackPressed();
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            // Hide soft keyboard
+            View focus = getCurrentFocus();
+            if (focus != null) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(focus.getWindowToken(), 0);
+            }
+
+            invalidateOptionsMenu();
+            searchQuery = "";
+            refresh();
+        } else {
+            super.onBackPressed();
+        }
     }
 }

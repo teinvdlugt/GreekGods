@@ -21,8 +21,6 @@ public class Relation {
     private Person person1, person2;
     private int id;
 
-    public enum RelationType {MARRIAGE, AFFAIR, SINGLE}
-
     public Relation() {
     }
 
