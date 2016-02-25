@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<HorizontalScrollView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".FamilyTreeActivity">
+    android:layout_height="match_parent">
 
-    <com.teinvdlugt.android.greekgods.FamilyTreeLayout
-        android:id="@+id/family_tree_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|center_horizontal" />
-</HorizontalScrollView>
+    <HorizontalScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorFamilyTreeBackground"
+        tools:context=".FamilyTreeActivity">
+
+        <com.teinvdlugt.android.greekgods.FamilyTreeLayout
+            android:id="@+id/family_tree_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center_horizontal" />
+    </HorizontalScrollView>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize" />
+</FrameLayout>
+

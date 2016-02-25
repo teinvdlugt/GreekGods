@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import com.teinvdlugt.android.greekgods.models.Person;
 
@@ -19,10 +21,13 @@ public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeL
     private FamilyTreeLayout treeLayout;
     private List<Integer> backStack = new ArrayList<>();
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_family_tree);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         treeLayout = (FamilyTreeLayout) findViewById(R.id.family_tree_layout);
         treeLayout.setOnPersonClickListener(this);
@@ -32,11 +37,11 @@ public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeL
     @Override
     public void onClickPerson(Person person) {
         if (person.getId() == treeLayout.getPerson().getId()) {
-            return;
+            PersonActivity.openActivity(this, person.getId());
+        } else {
+            backStack.add(treeLayout.getPerson().getId());
+            loadPerson(person.getId());
         }
-
-        backStack.add(treeLayout.getPerson().getId());
-        loadPerson(person.getId());
     }
 
     @Override
@@ -48,6 +53,15 @@ public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeL
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return false;
     }
 
     @SuppressLint("DefaultLocale")
@@ -144,7 +158,7 @@ public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeL
                     String[] columns = {"name", "shortDescription"};
                     String[] selectionArgs = {String.valueOf(id)};
                     c = db.query("people", columns, "personId=?", selectionArgs, null, null, null);
-                    boolean bool = c.moveToFirst();
+                    c.moveToFirst();
                     int nameIndex = c.getColumnIndex("name");
                     int shortDescIndex = c.getColumnIndex("shortDescription");
                     person.setName(c.getString(nameIndex));
