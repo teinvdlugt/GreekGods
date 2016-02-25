@@ -1,6 +1,8 @@
 package com.teinvdlugt.android.greekgods;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeLayout.OnPersonClickListener {
+    public static final String PERSON_ID_EXTRA = "personId";
 
     private FamilyTreeLayout treeLayout;
     private List<Integer> backStack = new ArrayList<>();
@@ -29,9 +32,11 @@ public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeL
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        int personId = getIntent().getIntExtra(PERSON_ID_EXTRA, 64);
+
         treeLayout = (FamilyTreeLayout) findViewById(R.id.family_tree_layout);
         treeLayout.setOnPersonClickListener(this);
-        loadPerson(64);
+        loadPerson(personId);
     }
 
     @Override
@@ -62,6 +67,12 @@ public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeL
             return true;
         }
         return false;
+    }
+
+    public static void openActivity(Context context, int personId) {
+        Intent intent = new Intent(context, FamilyTreeActivity.class);
+        intent.putExtra(PERSON_ID_EXTRA, personId);
+        context.startActivity(intent);
     }
 
     @SuppressLint("DefaultLocale")
