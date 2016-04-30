@@ -73,44 +73,44 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... params) {
                 if (checkNotConnected()) return null;
-                String peopleSQLStatements = downloadFile("http://teinvdlugt.netai.net/people.sql");
-                String relationsSQLStatements = downloadFile("http://teinvdlugt.netai.net/relations.sql");
-                String birthsSQLStatements = downloadFile("http://teinvdlugt.netai.net/births.sql");
+                String authorsSqlStatements = downloadFile("http://teinvdlugt.netai.net/authors.sql");
+                String birthsSqlStatements = downloadFile("http://teinvdlugt.netai.net/births.sql");
+                String bookMentionsBirthSqlStatements = downloadFile("http://teinvdlugt.netai.net/book_mentions_birth.sql");
+                String booksSqlStatements = downloadFile("http://teinvdlugt.netai.net/books.sql");
+                String peopleSqlStatements = downloadFile("http://teinvdlugt.netai.net/people.sql");
+                String relationsSqlStatements = downloadFile("http://teinvdlugt.netai.net/relations.sql");
 
                 SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
-                db.execSQL("DROP TABLE IF EXISTS `people`;");
-                db.execSQL("DROP TABLE IF EXISTS `relations`;");
-                db.execSQL("DROP TABLE IF EXISTS `births`;");
-                db.execSQL("CREATE TABLE `people` (\n" +
-                        "  `personId` int(11) NOT NULL,\n" +
-                        "  `name` varchar(30) NOT NULL,\n" +
-                        "  `description` varchar(1000) DEFAULT NULL,\n" +
-                        "  `shortDescription` varchar(100) DEFAULT NULL)");
-                db.execSQL("CREATE TABLE `relations` (\n" +
-                        "  `relatiod_id` int(11) NOT NULL,\n" +
-                        "  `personId1` int(11) DEFAULT NULL,\n" +
-                        "  `personId2` int(11) DEFAULT NULL,\n" +
-                        "  `description` varchar(1000) DEFAULT NULL,\n" +
-                        "  `relation_type` varchar(10) DEFAULT NULL)");
-                db.execSQL("CREATE TABLE `births` (\n" +
-                        "  `personId` int(11) NOT NULL,\n" +
-                        "  `relationId` int(11) NOT NULL)");
+                DBUtils.dropTables(db);
+                DBUtils.createTables(db);
 
-                if (peopleSQLStatements != null) {
-                    peopleSQLStatements = peopleSQLStatements.replaceAll("kcv.people", "people");
-                    String[] statements = peopleSQLStatements.split("\n");
+                if (authorsSqlStatements != null) {
+                    String[] statements = authorsSqlStatements.replaceAll("kcv.authors", "authors").split("\n");
                     for (String statement : statements)
                         db.execSQL(statement);
                 }
-                if (relationsSQLStatements != null) {
-                    relationsSQLStatements = relationsSQLStatements.replaceAll("kcv.relations", "relations");
-                    String[] statements = relationsSQLStatements.split("\n");
+                if (birthsSqlStatements != null) {
+                    String[] statements = birthsSqlStatements.replaceAll("kcv.births", "births").split("\n");
                     for (String statement : statements)
                         db.execSQL(statement);
                 }
-                if (birthsSQLStatements != null) {
-                    birthsSQLStatements = birthsSQLStatements.replaceAll("kcv.births", "births");
-                    String[] statements = birthsSQLStatements.split("\n");
+                if (bookMentionsBirthSqlStatements != null) {
+                    String[] statements = bookMentionsBirthSqlStatements.replaceAll("kcv.book_mentions_birth", "book_mentions_birth").split("\n");
+                    for (String statement : statements)
+                        db.execSQL(statement);
+                }
+                if (booksSqlStatements != null) {
+                    String[] statements = booksSqlStatements.replaceAll("kcv.books", "books").split("\n");
+                    for (String statement : statements)
+                        db.execSQL(statement);
+                }
+                if (peopleSqlStatements != null) {
+                    String[] statements = peopleSqlStatements.replaceAll("kcv.people", "people").split("\n");
+                    for (String statement : statements)
+                        db.execSQL(statement);
+                }
+                if (relationsSqlStatements != null) {
+                    String[] statements = relationsSqlStatements.replaceAll("kcv.relations", "relations").split("\n");
                     for (String statement : statements)
                         db.execSQL(statement);
                 }

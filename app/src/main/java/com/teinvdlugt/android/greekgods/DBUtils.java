@@ -16,6 +16,8 @@
  */
 package com.teinvdlugt.android.greekgods;
 
+import android.database.sqlite.SQLiteDatabase;
+
 public class DBUtils {
     /**
      * Format this String using one argument, being the id
@@ -85,4 +87,43 @@ public class DBUtils {
             "FROM people p\n" +
             "WHERE p.personId = %1$d OR p.personId = %2$d";
 
+    public static void dropTables(SQLiteDatabase db) {
+        db.execSQL("DROP TABLE IF EXISTS `authors`;");
+        db.execSQL("DROP TABLE IF EXISTS `births`;");
+        db.execSQL("DROP TABLE IF EXISTS `book_mentions_birth`;");
+        db.execSQL("DROP TABLE IF EXISTS `books`;");
+        db.execSQL("DROP TABLE IF EXISTS `people`;");
+        db.execSQL("DROP TABLE IF EXISTS `relations`;");
+    }
+
+    public static void createTables(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE `authors` (\n" +
+                "  `author_id` int(11) NOT NULL,\n" +
+                "  `name` varchar(50) DEFAULT NULL,\n" +
+                "  `description` varchar(3000) DEFAULT NULL);");
+        db.execSQL("CREATE TABLE `births` (\n" +
+                "  `personId` int(11) NOT NULL,\n" +
+                "  `relationId` int(11) NOT NULL,\n" +
+                "  `birth_id` int(11) NOT NULL);");
+        db.execSQL("CREATE TABLE `book_mentions_birth` (\n" +
+                "  `book_id` int(11) DEFAULT NULL,\n" +
+                "  `birth_id` int(11) DEFAULT NULL,\n" +
+                "  `line` int(11) DEFAULT NULL);");
+        db.execSQL("CREATE TABLE `books` (\n" +
+                "  `book_id` int(11) NOT NULL,\n" +
+                "  `author_id` int(11) DEFAULT NULL,\n" +
+                "  `description` varchar(3000) DEFAULT NULL,\n" +
+                "  `name` varchar(50) DEFAULT NULL);");
+        db.execSQL("CREATE TABLE `people` (\n" +
+                "  `personId` int(11) NOT NULL,\n" +
+                "  `name` varchar(30) NOT NULL,\n" +
+                "  `description` varchar(3000) DEFAULT NULL,\n" +
+                "  `shortDescription` varchar(100) DEFAULT NULL);");
+        db.execSQL("CREATE TABLE `relations` (\n" +
+                "  `relatiod_id` int(11) NOT NULL,\n" +
+                "  `personId1` int(11) DEFAULT NULL,\n" +
+                "  `personId2` int(11) DEFAULT NULL,\n" +
+                "  `description` varchar(1000) DEFAULT NULL,\n" +
+                "  `relation_type` varchar(10) DEFAULT NULL);");
+    }
 }
