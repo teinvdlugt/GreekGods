@@ -1,24 +1,7 @@
-/* Greek Gods: an Android application which shows the family tree of the Greek Gods.
- * Copyright (C) 2016 Tein van der Lugt
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.teinvdlugt.android.greekgods;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
@@ -26,14 +9,13 @@ import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.support.v4.app.Fragment;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.teinvdlugt.android.greekgods.models.Person;
@@ -41,33 +23,29 @@ import com.teinvdlugt.android.greekgods.models.Person;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RelationActivity extends AppCompatActivity {
-    public static final String RELATION_ID_EXTRA = "relation_id";
+public class RelationFragment extends Fragment {
 
     private TextView peopleTV, offspringTV;
     private TextView descriptionTV, relationTypeTV;
     private int relationId;
+    private Context context;
+    private InfoActivityInterface activity;
 
-    @SuppressWarnings("ConstantConditions")
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_relation);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_relation, container, false);
+        peopleTV = (TextView) view.findViewById(R.id.people_textView);
+        offspringTV = (TextView) view.findViewById(R.id.offspring_textView);
+        descriptionTV = (TextView) view.findViewById(R.id.description_textView);
+        relationTypeTV = (TextView) view.findViewById(R.id.relationType_textView);
+        return view;
+    }
 
-        relationId = getIntent().getIntExtra(RELATION_ID_EXTRA, -1);
-        peopleTV = (TextView) findViewById(R.id.people_textView);
-        offspringTV = (TextView) findViewById(R.id.offspring_textView);
-        descriptionTV = (TextView) findViewById(R.id.description_textView);
-        relationTypeTV = (TextView) findViewById(R.id.relationType_textView);
-
-        if (relationId != -1) {
-            refresh();
-        } else {
-            Snackbar.make(findViewById(R.id.coordinatorLayout),
-                    getString(R.string.something_went_wrong), Snackbar.LENGTH_INDEFINITE).show();
-        }
+    public void setRelation(Context context, int relationId) {
+        this.context = context;
+        this.relationId = relationId;
+        refresh();
     }
 
     private void refresh() {
@@ -80,7 +58,7 @@ public class RelationActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... params) {
                 int personId1 = -1, personId2 = -1;
-                SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
+                SQLiteDatabase db = context.openOrCreateDatabase("data", 0, null);
                 Cursor c = null;
 
                 try {
@@ -143,8 +121,6 @@ public class RelationActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(Void aVoid) {
                 if (people == null || people.isEmpty()) {
-                    Snackbar.make(findViewById(R.id.coordinatorLayout),
-                            R.string.something_went_wrong, Snackbar.LENGTH_LONG).show();
                     peopleTV.setVisibility(View.GONE);
                 } else {
                     // Toolbar title
@@ -153,7 +129,7 @@ public class RelationActivity extends AppCompatActivity {
                         if (i != 0) titleText.append(" & ");
                         titleText.append(people.get(i).getName());
                     }
-                    setTitle(getString(R.string.relation_colon, titleText));
+                    getActivity().setTitle(getString(R.string.relation_colon, titleText));
 
                     peopleTV.setText(formatClickablePersonList(people));
                     peopleTV.setMovementMethod(LinkMovementMethod.getInstance());
@@ -191,10 +167,10 @@ public class RelationActivity extends AppCompatActivity {
                     if (i != 0) ssb.append("\n");
                     ssb.append(people.get(i).getName());
                     final int personId = people.get(i).getId();
-                    MyClickableSpan cs = new MyClickableSpan(RelationActivity.this) {
+                    MyClickableSpan cs = new MyClickableSpan(context) {
                         @Override
                         public void onClick(View widget) {
-                            PersonActivity.openActivity(RelationActivity.this, personId);
+                            activity.onClickPerson(personId);
                         }
                     };
                     ssb.setSpan(cs, ssb.length() - people.get(i).getName().length(),
@@ -206,18 +182,9 @@ public class RelationActivity extends AppCompatActivity {
         }.execute();
     }
 
-    public static void openActivity(Context context, int relationId) {
-        Intent intent = new Intent(context, RelationActivity.class);
-        intent.putExtra(RELATION_ID_EXTRA, relationId);
-        context.startActivity(intent);
-    }
-
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-        return false;
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        activity = (InfoActivityInterface) context;
     }
 }

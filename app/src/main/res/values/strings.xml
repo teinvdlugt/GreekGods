@@ -27,4 +27,6 @@
     <string name="search_in_people">Zoeken in personen</string>
     <string name="family_tree">Stamboom</string>
     <string name="view_in_family_tree">Bekijken in stamboom</string>
+    <string name="go_back">Go back</string>
+    <string name="go_forward">Go forward</string>
 </resources>

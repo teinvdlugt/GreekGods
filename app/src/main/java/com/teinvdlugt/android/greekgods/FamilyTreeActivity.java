@@ -42,7 +42,7 @@ public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeL
     @Override
     public void onClickPerson(Person person) {
         if (person.getId() == treeLayout.getPerson().getId()) {
-            PersonActivity.openActivity(this, person.getId());
+            InfoActivity.openActivity(this, person.getId(), Info.INFO_TYPE_PERSON);
         } else {
             backStack.add(treeLayout.getPerson().getId());
             loadPerson(person.getId());

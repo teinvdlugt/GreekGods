@@ -24,15 +24,11 @@
             android:label="@string/all_people" />
 
         <activity
-            android:name=".PersonActivity"
-            android:label="@string/person" />
-
-        <activity
-            android:name=".RelationActivity"
-            android:label="@string/relation" />
-
-        <activity
             android:name=".FamilyTreeActivity"
             android:label="@string/family_tree" />
+
+        <activity
+            android:name=".InfoActivity"
+            android:label="Info" />
     </application>
 </manifest>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_view_in_family_tree"
+        android:orderInCategory="100"
+        android:title="@string/view_in_family_tree"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/back_button"
+        android:icon="@drawable/ic_arrow_back_white_36dp"
+        android:orderInCategory="101"
+        android:title="@string/go_back"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/forward_button"
+        android:icon="@drawable/ic_arrow_forward_white_36dp"
+        android:orderInCategory="102"
+        android:title="@string/go_forward"
+        app:showAsAction="ifRoom" />
+</menu>

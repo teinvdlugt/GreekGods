@@ -101,9 +101,7 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
 
     @Override
     public void onClickPerson(Person person) {
-        Intent intent = new Intent(this, PersonActivity.class);
-        intent.putExtra(PersonActivity.PERSON_ID_EXTRA, person.getId());
-        startActivity(intent);
+        InfoActivity.openActivity(this, person.getId(), Info.INFO_TYPE_PERSON);
     }
 
     @Override

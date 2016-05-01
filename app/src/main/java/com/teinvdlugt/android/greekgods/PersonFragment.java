@@ -1,24 +1,8 @@
-/* Greek Gods: an Android application which shows the family tree of the Greek Gods.
- * Copyright (C) 2016 Tein van der Lugt
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.teinvdlugt.android.greekgods;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
@@ -27,16 +11,14 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.support.v4.app.Fragment;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.teinvdlugt.android.greekgods.models.Person;
@@ -47,32 +29,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PersonActivity extends AppCompatActivity {
-    public static final String PERSON_ID_EXTRA = "person_id";
+public class PersonFragment extends Fragment {
 
     private TextView parentsTextView, relationsTextView;
     private TextView descriptionTV;
     private int personId;
+    private Context context;
+    private InfoActivityInterface activity;
 
-    @SuppressWarnings("ConstantConditions")
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_person);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_person, container, false);
+        parentsTextView = (TextView) view.findViewById(R.id.parents_textView);
+        relationsTextView = (TextView) view.findViewById(R.id.relations_textView);
+        descriptionTV = (TextView) view.findViewById(R.id.description_textView);
+        return view;
+    }
 
-        personId = getIntent().getIntExtra(PERSON_ID_EXTRA, -1);
-        parentsTextView = (TextView) findViewById(R.id.parents_textView);
-        relationsTextView = (TextView) findViewById(R.id.relations_textView);
-        descriptionTV = (TextView) findViewById(R.id.description_textView);
-
-        if (personId != -1) {
-            refresh();
-        } else {
-            Snackbar.make(findViewById(R.id.coordinatorLayout),
-                    getString(R.string.something_went_wrong), Snackbar.LENGTH_INDEFINITE).show();
-        }
+    public void setPerson(Context context, int personId) {
+        this.context = context;
+        this.personId = personId;
+        refresh();
     }
 
     private void refresh() {
@@ -85,7 +63,7 @@ public class PersonActivity extends AppCompatActivity {
             @SuppressLint("DefaultLocale")
             @Override
             protected Void doInBackground(Void... params) {
-                SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
+                SQLiteDatabase db = context.openOrCreateDatabase("data", 0, null);
                 Cursor c = null;
 
                 // Person's name and description
@@ -186,11 +164,11 @@ public class PersonActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(Void aVoid) {
                 if (name != null) {
-                    setTitle(name);
+                    getActivity().setTitle(name);
                 }
-                if (shortDescription != null && getSupportActionBar() != null) {
-                    getSupportActionBar().setSubtitle(shortDescription);
-                }
+                /*if (shortDescription != null && getSupportActionBar() != null) {
+                    TODO getSupportActionBar().setSubtitle(shortDescription);
+                }*/
                 if (description != null) {
                     descriptionTV.setText(description);
                 } else {
@@ -212,10 +190,10 @@ public class PersonActivity extends AppCompatActivity {
                 SpannableStringBuilder ssb = new SpannableStringBuilder();
                 for (Relation relation : parents.keySet()) {
                     final int relationId = relation.getId();
-                    MyClickableSpan cs = new MyClickableSpan(PersonActivity.this) {
+                    MyClickableSpan cs = new MyClickableSpan(context) {
                         @Override
                         public void onClick(View widget) {
-                            RelationActivity.openActivity(PersonActivity.this, relationId);
+                            activity.onClickRelation(relationId);
                         }
                     };
                     List<String> parentNames = parents.get(relation);
@@ -238,10 +216,10 @@ public class PersonActivity extends AppCompatActivity {
                 SpannableStringBuilder ssb = new SpannableStringBuilder();
                 for (Relation relation : relationsAndChildren.keySet()) {
                     final int relationId = relation.getId();
-                    MyClickableSpan cs = new MyClickableSpan(PersonActivity.this) {
+                    MyClickableSpan cs = new MyClickableSpan(context) {
                         @Override
                         public void onClick(View widget) {
-                            RelationActivity.openActivity(PersonActivity.this, relationId);
+                            activity.onClickRelation(relationId);
                         }
                     };
 
@@ -261,10 +239,10 @@ public class PersonActivity extends AppCompatActivity {
                     for (int i = 0; i < children.size(); i++) {
                         Person child = children.get(i);
                         final int childId = child.getId();
-                        MyClickableSpan cs2 = new MyClickableSpan(PersonActivity.this) {
+                        MyClickableSpan cs2 = new MyClickableSpan(context) {
                             @Override
                             public void onClick(View widget) {
-                                openActivity(PersonActivity.this, childId);
+                                activity.onClickPerson(childId);
                             }
                         };
 
@@ -288,25 +266,8 @@ public class PersonActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_person, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        } else if (item.getItemId() == R.id.menu_view_in_family_tree) {
-            FamilyTreeActivity.openActivity(this, personId);
-        }
-        return false;
-    }
-
-    public static void openActivity(Context context, int personId) {
-        Intent intent = new Intent(context, PersonActivity.class);
-        intent.putExtra(PERSON_ID_EXTRA, personId);
-        context.startActivity(intent);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        activity = (InfoActivityInterface) context;
     }
 }
