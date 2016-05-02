@@ -21,7 +21,7 @@ import java.util.List;
 public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeLayout.OnPersonClickListener {
     public static final String PERSON_ID_EXTRA = "personId";
 
-    private FamilyTreeLayout treeLayout;
+    private FamilyTreeLayout2 treeLayout;
     private List<Integer> backStack = new ArrayList<>();
 
     @SuppressWarnings("ConstantConditions")
@@ -34,19 +34,19 @@ public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeL
 
         int personId = getIntent().getIntExtra(PERSON_ID_EXTRA, 64);
 
-        treeLayout = (FamilyTreeLayout) findViewById(R.id.family_tree_layout);
-        treeLayout.setOnPersonClickListener(this);
+        treeLayout = (FamilyTreeLayout2) findViewById(R.id.family_tree_layout);
+        //treeLayout.setOnPersonClickListener(this);
         loadPerson(personId);
     }
 
     @Override
     public void onClickPerson(Person person) {
-        if (person.getId() == treeLayout.getPerson().getId()) {
+        /*if (person.getId() == treeLayout.getPerson().getId()) {
             InfoActivity.openActivity(this, person.getId(), Info.INFO_TYPE_PERSON);
         } else {
             backStack.add(treeLayout.getPerson().getId());
             loadPerson(person.getId());
-        }
+        }*/
     }
 
     @Override
