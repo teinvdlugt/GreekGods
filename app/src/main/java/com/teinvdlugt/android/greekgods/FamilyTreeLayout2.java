@@ -42,6 +42,7 @@ public class FamilyTreeLayout2 extends ViewGroup {
 
     private Person person;
     private int startX, startY;
+    private double scale = 1;
     private Paint childRelationPaint, marriageRelationPaint;
 
     @Override
@@ -50,40 +51,111 @@ public class FamilyTreeLayout2 extends ViewGroup {
         removeAllViewsInLayout();
         for (Person person : people.keySet()) {
             Rect personRect = people.get(person);
-            if (personRect.intersects(l + startX, t + startY, r + startX, b + startY)) {
+            if (personRect.intersects((int) (l / scale + startX), (int) (t / scale + startY),
+                    (int) (r / scale + startX), (int) (b / scale + startY))) {
                 FamilyTreeNode view = new FamilyTreeNode(getContext());
                 view.setPerson(person);
-                addView(view);
-                view.layout(personRect.left - startX, personRect.top - startY,
-                        personRect.right - startX, personRect.bottom - startY);
+                addViewInLayout(view, -1, generateDefaultLayoutParams());
+                view.layout((int) ((personRect.left - startX) * scale), (int) ((personRect.top - startY) * scale),
+                        (int) ((personRect.right - startX) / scale), (int) ((personRect.bottom - startY) / scale));
             }
         }
     }
 
-    private float prevTouchX, prevTouchY;
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // Don't allow wrap_content, for the same reason as ScrollView
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+    }
+
+    private float prevTouchX1 = -1, prevTouchY1 = -1;
+    private float prevTouchX2 = -1, prevTouchY2 = -1;
+    private int pointerId1 = -1, pointerId2 = -1;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
+        switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                prevTouchX = event.getX();
-                prevTouchY = event.getY();
+                prevTouchX1 = event.getX();
+                prevTouchY1 = event.getY();
+                pointerId1 = event.getPointerId(0);
                 return true;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if (pointerId2 == -1) {
+                    int index = event.getActionIndex();
+                    pointerId2 = event.getPointerId(index);
+                    prevTouchX2 = event.getX(index);
+                    prevTouchY2 = event.getY(index);
+                }
             case MotionEvent.ACTION_MOVE:
-                startX += prevTouchX - event.getX();
-                startY += prevTouchY - event.getY();
-                prevTouchX = event.getX();
-                prevTouchY = event.getY();
+                if (event.getPointerCount() == 1) {
+                    startX += (prevTouchX1 - event.getX()) / scale;
+                    startY += (prevTouchY1 - event.getY()) / scale;
+                    prevTouchX1 = event.getX();
+                    prevTouchY1 = event.getY();
+                } else {
+                    int indexCurrent = event.getActionIndex();
+                    int index1 = event.findPointerIndex(pointerId1);
+                    int index2 = event.findPointerIndex(pointerId2);
+                    if (indexCurrent != index1 && indexCurrent != index2
+                            || index1 == -1 || index2 == -1
+                            || prevTouchX1 == -1 || prevTouchY1 == -1
+                            || prevTouchX2 == -1 || prevTouchY2 == -1) break;
+
+                    double prevXDist = prevTouchX2 - prevTouchX1;
+                    double prevYDist = prevTouchY2 - prevTouchY1;
+                    double prevDistSqr = prevXDist * prevXDist + prevYDist * prevYDist;
+
+                    double prevCenterPointX = (prevTouchX1 + prevTouchX2) / 2d;
+                    double prevCenterPointY = (prevTouchY1 + prevTouchY2) / 2d;
+                    double prevCenterPointXScaled = prevCenterPointX / scale + startX;
+                    double prevCenterPointYScaled = prevCenterPointY / scale + startY;
+
+                    prevTouchX1 = event.getX(index1);
+                    prevTouchY1 = event.getY(index1);
+                    prevTouchX2 = event.getX(index2);
+                    prevTouchY2 = event.getY(index2);
+
+                    double xDist = prevTouchX2 - prevTouchX1;
+                    double yDist = prevTouchY2 - prevTouchY1;
+                    double distSqr = xDist * xDist + yDist * yDist;
+                    scale *= Math.sqrt(distSqr / prevDistSqr);
+
+                    double centerPointX = (prevTouchX1 + prevTouchX2) / 2d;
+                    double centerPointY = (prevTouchY1 + prevTouchY2) / 2d;
+                    startX = (int) (prevCenterPointXScaled - centerPointX / scale);
+                    startY = (int) (prevCenterPointYScaled - centerPointY / scale);
+                }
+
                 invalidate();
                 requestLayout();
                 return true;
+            case MotionEvent.ACTION_POINTER_UP:
+                int pointerIndex = event.getActionIndex();
+                if (pointerIndex == event.findPointerIndex(pointerId1)) {
+                    // Transfer the data of pointer 2 to pointer 1,
+                    pointerId1 = pointerId2;
+                    prevTouchX1 = prevTouchX2;
+                    prevTouchY1 = prevTouchY2;
+                }
+                if (pointerIndex == event.findPointerIndex(pointerId1) ||
+                        pointerIndex == event.findPointerIndex(pointerId2)) {
+                    // Get rid of pointer 2
+                    pointerId2 = -1;
+                    prevTouchX2 = prevTouchY2 = -1;
+                }
+                return true; // TODO don't return?
+            case MotionEvent.ACTION_UP:
+                prevTouchX1 = prevTouchY1 = prevTouchX2 = prevTouchY2
+                        = pointerId1 = pointerId2 = -1;
+                return true; // TODO don't return?
         }
         return super.onTouchEvent(event);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+        // TODO use {@code scale}
         if (relations == null || relations.isEmpty()) return;
         for (Person[] persons : relations.keySet()) {
             Rect person1 = people.get(persons[0]);
