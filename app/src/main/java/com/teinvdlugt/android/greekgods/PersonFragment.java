@@ -95,36 +95,41 @@ public class PersonFragment extends Fragment {
                     c.moveToFirst();
                     do {
                         Parents parents = new Parents();
-
-                        // Get names of parents
-                        int relationId = c.getInt(relationColumn);
-                        parents.relation = new Relation(relationId);
-                        String relationNamesQuery = String.format(DBUtils.NAMES_OF_RELATION_QUERY, relationId);
-                        c2 = db.rawQuery(relationNamesQuery, null);
-                        int nameColumn = c2.getColumnIndex("name");
-                        c2.moveToFirst();
-                        do {
-                            parents.names.add(c2.getString(nameColumn));
-                        } while (c2.moveToNext());
-
-                        // Get books that mention this birth
-                        int birthId = c.getInt(birthIdColumn);
-                        String booksQuery = String.format(DBUtils.BOOKS_OF_BIRTH_QUERY, birthId);
-                        c2 = db.rawQuery(booksQuery, null);
-                        int idColumn = c2.getColumnIndex("book_id");
-                        nameColumn = c2.getColumnIndex("name");
-                        c2.moveToFirst();
-                        do {
-                            Book book = new Book();
-                            book.id = c2.getInt(idColumn);
-                            book.name = c2.getString(nameColumn);
-                            parents.books.add(book);
-                        } while (c2.moveToNext());
-                        c2.close();
-
                         parentses.add(parents);
+
+                        try {
+                            // Get names of parents
+                            int relationId = c.getInt(relationColumn);
+                            parents.relation = new Relation(relationId);
+                            String relationNamesQuery = String.format(DBUtils.NAMES_OF_RELATION_QUERY, relationId);
+                            c2 = db.rawQuery(relationNamesQuery, null);
+                            int nameColumn = c2.getColumnIndex("name");
+                            c2.moveToFirst();
+                            do {
+                                parents.names.add(c2.getString(nameColumn));
+                            } while (c2.moveToNext());
+
+                            // Get books that mention this birth
+                            int birthId = c.getInt(birthIdColumn);
+                            String booksQuery = String.format(DBUtils.BOOKS_OF_BIRTH_QUERY, birthId);
+                            c2 = db.rawQuery(booksQuery, null);
+                            int idColumn = c2.getColumnIndex("book_id");
+                            nameColumn = c2.getColumnIndex("name");
+                            c2.moveToFirst();
+                            do {
+                                Book book = new Book();
+                                book.id = c2.getInt(idColumn);
+                                book.name = c2.getString(nameColumn);
+                                parents.books.add(book);
+                            } while (c2.moveToNext());
+                            c2.close();
+                        } catch (SQLiteException | CursorIndexOutOfBoundsException e) {
+                            e.printStackTrace();
+                        } finally {
+                            if (c2 != null) c2.close();
+                        }
                     } while (c.moveToNext());
-                } catch (SQLiteException | IndexOutOfBoundsException e) {
+                } catch (SQLiteException | CursorIndexOutOfBoundsException e) {
                     e.printStackTrace();
                 } finally {
                     if (c != null) c.close();
