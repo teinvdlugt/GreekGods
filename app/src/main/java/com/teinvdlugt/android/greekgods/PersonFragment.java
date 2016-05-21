@@ -199,7 +199,7 @@ public class PersonFragment extends Fragment {
                 } else {
                     descriptionTV.setText(R.string.no_description_available);
                 }
-                if (parentses == null || parentses.isEmpty()) {
+                if (parentses == null || parentses.get(0).names.isEmpty()) {
                     parentsTextView.setText(R.string.no_parents);
                 } else {
                     setParentTexts();
