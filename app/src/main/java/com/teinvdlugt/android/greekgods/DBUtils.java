@@ -18,6 +18,8 @@ package com.teinvdlugt.android.greekgods;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.List;
+
 public class DBUtils {
     /**
      * Format this String using one argument, being the id
@@ -72,6 +74,12 @@ public class DBUtils {
     public static final String PARENTS_RELATIONS_QUERY = "SELECT b.relationId\n" +
             "FROM births b\n" +
             "WHERE b.personId = %d";
+
+    public static final String BIRTHS_OF_PERSON_QUERY = "SELECT * FROM births b WHERE b.personId = %d";
+
+    public static final String BOOKS_OF_BIRTH_QUERY = "SELECT books.book_id, books.name\n" +
+            "FROM books, book_mentions_birth\n" +
+            "WHERE book_mentions_birth.birth_id = %d AND book_mentions_birth.book_id = books.book_id";
 
     /**
      * Format this String using one argument, being a relationId.

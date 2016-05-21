@@ -1,7 +1,6 @@
 package com.teinvdlugt.android.greekgods;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
@@ -21,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.teinvdlugt.android.greekgods.models.Book;
+import com.teinvdlugt.android.greekgods.models.Parents;
 import com.teinvdlugt.android.greekgods.models.Person;
 import com.teinvdlugt.android.greekgods.models.Relation;
 
@@ -57,7 +58,8 @@ public class PersonFragment extends Fragment {
         new AsyncTask<Void, Void, Void>() {
             private String name;
             private String description, shortDescription;
-            private Map<Relation, List<String>> parents;
+            //private Map<Relation, List<String>> parents;
+            private List<Parents> parentses;
             private Map<Relation, List<Person>> relationsAndChildren = new HashMap<>();
 
             @SuppressLint("DefaultLocale")
@@ -82,30 +84,48 @@ public class PersonFragment extends Fragment {
                 }
 
                 // Parents
-                parents = new HashMap<>();
+                parentses = new ArrayList<>();
                 Cursor c2 = null;
                 try {
-                    String parentRelationsQuery = String.format(DBUtils.PARENTS_RELATIONS_QUERY, personId);
-                    c = db.rawQuery(parentRelationsQuery, null);
-                    int idColumn = c.getColumnIndex("relationId");
+                    String birthsQuery = String.format(DBUtils.BIRTHS_OF_PERSON_QUERY, personId);
+                    //String parentRelationsQuery = String.format(DBUtils.PARENTS_RELATIONS_QUERY, personId);
+                    c = db.rawQuery(birthsQuery, null);
+                    int birthIdColumn = c.getColumnIndex("birth_id");
+                    int relationColumn = c.getColumnIndex("relationId");
                     c.moveToFirst();
                     do {
-                        int relationId = c.getInt(idColumn);
-                        Relation relation = new Relation(relationId);
-                        List<String> parentNames = new ArrayList<>();
+                        Parents parents = new Parents();
+
+                        // Get names of parents
+                        int relationId = c.getInt(relationColumn);
+                        parents.relation = new Relation(relationId);
                         String relationNamesQuery = String.format(DBUtils.NAMES_OF_RELATION_QUERY, relationId);
                         c2 = db.rawQuery(relationNamesQuery, null);
                         int nameColumn = c2.getColumnIndex("name");
                         c2.moveToFirst();
                         do {
-                            parentNames.add(c2.getString(nameColumn));
+                            parents.names.add(c2.getString(nameColumn));
+                        } while (c2.moveToNext());
+
+                        // Get books that mention this birth
+                        int birthId = c.getInt(birthIdColumn);
+                        String booksQuery = String.format(DBUtils.BOOKS_OF_BIRTH_QUERY, birthId);
+                        c2 = db.rawQuery(booksQuery, null);
+                        int idColumn = c2.getColumnIndex("book_id");
+                        nameColumn = c2.getColumnIndex("name");
+                        c2.moveToFirst();
+                        do {
+                            Book book = new Book();
+                            book.id = c2.getInt(idColumn);
+                            book.name = c2.getString(nameColumn);
+                            parents.books.add(book);
                         } while (c2.moveToNext());
                         c2.close();
-                        parents.put(relation, parentNames);
+
+                        parentses.add(parents);
                     } while (c.moveToNext());
-                } catch (SQLiteException e) {
+                } catch (SQLiteException | IndexOutOfBoundsException e) {
                     e.printStackTrace();
-                } catch (CursorIndexOutOfBoundsException ignored) {
                 } finally {
                     if (c != null) c.close();
                     if (c2 != null) c2.close();
@@ -174,7 +194,7 @@ public class PersonFragment extends Fragment {
                 } else {
                     descriptionTV.setText(R.string.no_description_available);
                 }
-                if (parents == null || parents.isEmpty()) {
+                if (parentses == null || parentses.isEmpty()) {
                     parentsTextView.setText(R.string.no_parents);
                 } else {
                     setParentTexts();
@@ -188,19 +208,27 @@ public class PersonFragment extends Fragment {
 
             private void setParentTexts() {
                 SpannableStringBuilder ssb = new SpannableStringBuilder();
-                for (Relation relation : parents.keySet()) {
-                    final int relationId = relation.getId();
+                for (Parents parents : parentses) {
+                    final int relationId = parents.relation.getId();
                     MyClickableSpan cs = new MyClickableSpan(context) {
                         @Override
                         public void onClick(View widget) {
                             activity.onClickRelation(relationId);
                         }
                     };
-                    List<String> parentNames = parents.get(relation);
                     StringBuilder relationText = new StringBuilder();
-                    for (int i = 0; i < parentNames.size(); i++) {
+                    // Parents names
+                    for (int i = 0; i < parents.names.size(); i++) {
                         if (i != 0) relationText.append(" & ");
-                        relationText.append(parentNames.get(i));
+                        relationText.append(parents.names.get(i));
+                    }
+                    // Book names
+                    if (!parents.books.isEmpty()) {
+                        relationText.append(" (");
+                        for (Book book : parents.books) {
+                            relationText.append(book.name).append(", ");
+                        }
+                        relationText.replace(relationText.length() - 2, relationText.length(), ")");
                     }
                     ssb.append(relationText);
                     ssb.setSpan(cs, ssb.length() - relationText.length(),
