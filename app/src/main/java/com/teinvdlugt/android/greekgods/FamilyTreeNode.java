@@ -61,6 +61,12 @@ public class FamilyTreeNode extends CardView {
         addView(content);
     }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        setPerson(person);
+    }
+
     public FamilyTreeNode(Context context) {
         super(context);
         init(context);

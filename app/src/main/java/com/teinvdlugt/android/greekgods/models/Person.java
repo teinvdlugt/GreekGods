@@ -26,13 +26,7 @@ public class Person {
     private List<Person> parents;
     private int id;
 
-    public Person(int id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public Person() {
-    }
+    public Person() {}
 
     public Person(int id) {
         this.id = id;

@@ -1,3 +1,19 @@
+/* Greek Gods: an Android application which shows the family tree of the Greek Gods.
+ * Copyright (C) 2016 Tein van der Lugt
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.teinvdlugt.android.greekgods;
 
 import android.annotation.SuppressLint;
@@ -18,7 +34,7 @@ import com.teinvdlugt.android.greekgods.models.Person;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeLayout.OnPersonClickListener {
+public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeLayout2.OnPersonClickListener {
     public static final String PERSON_ID_EXTRA = "personId";
 
     private FamilyTreeLayout2 treeLayout;
@@ -35,18 +51,18 @@ public class FamilyTreeActivity extends AppCompatActivity implements FamilyTreeL
         int personId = getIntent().getIntExtra(PERSON_ID_EXTRA, 64);
 
         treeLayout = (FamilyTreeLayout2) findViewById(R.id.family_tree_layout);
-        //treeLayout.setOnPersonClickListener(this);
+        treeLayout.setOnPersonClickListener(this);
         loadPerson(personId);
     }
 
     @Override
     public void onClickPerson(Person person) {
-        /*if (person.getId() == treeLayout.getPerson().getId()) {
+        if (person.getId() == treeLayout.getPerson().getId()) {
             InfoActivity.openActivity(this, person.getId(), Info.INFO_TYPE_PERSON);
         } else {
             backStack.add(treeLayout.getPerson().getId());
             loadPerson(person.getId());
-        }*/
+        }
     }
 
     @Override
