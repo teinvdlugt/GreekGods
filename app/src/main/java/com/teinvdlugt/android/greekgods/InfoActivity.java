@@ -30,6 +30,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityInter
         if (savedInstanceState != null) {
             backStack = (ArrayList<Info>) savedInstanceState.getSerializable(BACK_STACK);
             posInBackStack = savedInstanceState.getInt(POS_IN_BACK_STACK, 0);
+            showInfo();
         }
         if (backStack == null || backStack.isEmpty()) {
             Info info = (Info) getIntent().getSerializableExtra(INFO_EXTRA);
@@ -40,7 +41,12 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityInter
         }
     }
 
+    public void setSubtitle(String subtitle) {
+        if (getSupportActionBar() != null) getSupportActionBar().setSubtitle(subtitle);
+    }
+
     private void showInfo() {
+        setSubtitle(null);
         Info info = backStack.get(posInBackStack);
         switch (info.infoType) {
             case Info.INFO_TYPE_PERSON:

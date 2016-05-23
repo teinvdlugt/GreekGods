@@ -191,9 +191,9 @@ public class PersonFragment extends Fragment {
                 if (name != null) {
                     getActivity().setTitle(name);
                 }
-                /*if (shortDescription != null && getSupportActionBar() != null) {
-                    TODO getSupportActionBar().setSubtitle(shortDescription);
-                }*/
+                if (shortDescription != null) {
+                    ((InfoActivity) getActivity()).setSubtitle(shortDescription);
+                }
                 if (description != null) {
                     descriptionTV.setText(description);
                 } else {
