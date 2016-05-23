@@ -93,7 +93,9 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
                         p.setName(c.getString(nameColumn));
                         result.add(p);
                     } while (c.moveToNext());
-                } catch (CursorIndexOutOfBoundsException | SQLiteException ignored) {
+                } catch (SQLiteException e) {
+                    return null;
+                } catch (CursorIndexOutOfBoundsException ignored) {
                 } finally {
                     if (c != null) c.close();
                     if (db != null) db.close();

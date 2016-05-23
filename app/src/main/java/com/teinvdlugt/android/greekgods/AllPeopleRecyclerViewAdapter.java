@@ -78,14 +78,14 @@ public class AllPeopleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
 
     @Override
     public int getItemViewType(int position) {
-        if (data.isEmpty()) return NO_PEOPLE_ITEM_VIEW_TYPE;
+        if (data == null) return NO_PEOPLE_ITEM_VIEW_TYPE;
         else return PERSON_ITEM_VIEW_TYPE;
     }
 
     @Override
     public int getItemCount() {
-        if (data.isEmpty()) return 1;
-        if (data == null) return 0;
+        if (data == null) return 1;
+        //if (data == null) return 0;
         return data.size();
     }
 
