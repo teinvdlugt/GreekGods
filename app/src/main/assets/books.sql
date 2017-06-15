@@ -1,0 +1,2 @@
+INSERT INTO kcv.books (book_id, author_id, description, name) VALUES (1, 1, 'Een van de belangrijkste mythologische werken, geschreven door Ovidius.', 'Metamorphosen');
+INSERT INTO kcv.books (book_id, author_id, description, name) VALUES (2, 2, 'Een van de oudste mythologische werken die de genealogie van de Griekse mythologie beschrijft.', 'Theogonie');

@@ -17,6 +17,7 @@
 package com.teinvdlugt.android.greekgods;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
@@ -184,12 +185,12 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
             @Override
             protected Void doInBackground(Void... params) {
                 if (checkNotConnected()) return null;
-                String authorsSqlStatements = downloadFile("http://teinvdlugt.netai.net/authors.sql");
-                String birthsSqlStatements = downloadFile("http://teinvdlugt.netai.net/births.sql");
-                String bookMentionsBirthSqlStatements = downloadFile("http://teinvdlugt.netai.net/book_mentions_birth.sql");
-                String booksSqlStatements = downloadFile("http://teinvdlugt.netai.net/books.sql");
-                String peopleSqlStatements = downloadFile("http://teinvdlugt.netai.net/people.sql");
-                String relationsSqlStatements = downloadFile("http://teinvdlugt.netai.net/relations.sql");
+                String authorsSqlStatements = getFileFromAssets("authors.sql");
+                String birthsSqlStatements = getFileFromAssets("births.sql");
+                String bookMentionsBirthSqlStatements = getFileFromAssets("book_mentions_birth.sql");
+                String booksSqlStatements = getFileFromAssets("books.sql");
+                String peopleSqlStatements = getFileFromAssets("people.sql");
+                String relationsSqlStatements = getFileFromAssets("relations.sql");
 
                 SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
                 DBUtils.dropTables(db);
@@ -228,6 +229,16 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
 
                 db.close();
                 return null;
+            }
+
+            private String getFileFromAssets(String filename) {
+                try {
+                    InputStream is = getAssets().open(filename);
+                    return read(is);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }
 
             private String downloadFile(String URL) {
