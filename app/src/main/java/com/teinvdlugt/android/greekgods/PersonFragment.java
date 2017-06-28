@@ -188,11 +188,13 @@ public class PersonFragment extends Fragment {
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                if (name != null) {
-                    getActivity().setTitle(name);
-                }
-                if (shortDescription != null) {
-                    ((InfoActivity) getActivity()).setSubtitle(shortDescription);
+                if (getActivity() != null) {
+                    if (name != null) {
+                        getActivity().setTitle(name);
+                    }
+                    if (shortDescription != null) {
+                        ((InfoActivity) getActivity()).setSubtitle(shortDescription);
+                    }
                 }
                 if (description != null) {
                     descriptionTV.setText(description);

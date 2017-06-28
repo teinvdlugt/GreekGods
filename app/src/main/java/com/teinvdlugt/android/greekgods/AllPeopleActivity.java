@@ -16,14 +16,10 @@
  */
 package com.teinvdlugt.android.greekgods;
 
-import android.content.Context;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -44,8 +40,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -176,15 +170,20 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
     private void fillDatabase() {
         new AsyncTask<Void, Void, Void>() {
 
+            SQLiteDatabase db;
+
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
+                db = openOrCreateDatabase("data", 0, null);
+                DBUtils.dropTables(db);
+                adapter.setData(null);
+                adapter.notifyDataSetChanged();
                 Snackbar.make(recyclerView, R.string.refreshing_database, Snackbar.LENGTH_INDEFINITE).show();
             }
 
             @Override
             protected Void doInBackground(Void... params) {
-                if (checkNotConnected()) return null;
                 String authorsSqlStatements = getFileFromAssets("authors.sql");
                 String birthsSqlStatements = getFileFromAssets("births.sql");
                 String bookMentionsBirthSqlStatements = getFileFromAssets("book_mentions_birth.sql");
@@ -192,7 +191,6 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
                 String peopleSqlStatements = getFileFromAssets("people.sql");
                 String relationsSqlStatements = getFileFromAssets("relations.sql");
 
-                SQLiteDatabase db = openOrCreateDatabase("data", 0, null);
                 DBUtils.dropTables(db);
                 DBUtils.createTables(db);
 
@@ -241,25 +239,6 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
                 }
             }
 
-            private String downloadFile(String URL) {
-                try {
-                    java.net.URL url = new URL(URL);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setReadTimeout(10000);
-                    conn.setConnectTimeout(15000);
-                    conn.setRequestMethod("GET");
-                    conn.setDoInput(true);
-                    conn.connect();
-                    int response = conn.getResponseCode();
-                    if (response >= 400) return "" + response;
-                    InputStream is = conn.getInputStream();
-                    return read(is);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-
             private String read(InputStream inputStream) throws IOException {
                 InputStreamReader reader = new InputStreamReader(inputStream, "UTF-8");
                 BufferedReader bufferedReader = new BufferedReader(reader);
@@ -269,12 +248,6 @@ public class AllPeopleActivity extends AppCompatActivity implements AllPeopleRec
                     sb.append(line).append("\n");
                 }
                 return sb.toString();
-            }
-
-            private boolean checkNotConnected() {
-                ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
-                return networkInfo == null || !networkInfo.isConnected();
             }
 
             @Override
