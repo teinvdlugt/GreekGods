@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Greek Gods</string>
+    <string name="refresh_database">Database verversen</string>
+    <string name="refreshing_database">Database verversen…</string>
+    <string name="refresh_database_done">Database ververst!</string>
+    <string name="parentses">Ouders</string>
+    <string name="relations_and_children">Nakomelingen per relatie</string>
+    <string name="something_went_wrong">Er is iets misgegaan</string>
+    <string name="no_parents">Geen ouders</string>
+    <string name="no_relations">Geen relaties</string>
+    <string name="single_relation_text">%s in zijn/haar eentje</string>
+    <string name="relation">Relatie</string>
+    <string name="people">Personen</string>
+    <string name="description">Beschrijving</string>
+    <string name="offspring">Nageslacht</string>
+    <string name="relation_type">Type</string>
+    <string name="no_offspring">Uit deze relatie volgden geen nakomelingen.</string>
+    <string name="relation_type_marriage">Officieel</string>
+    <string name="relation_type_affair">Affaire</string>
+    <string name="relation_type_single">Eén persoon</string>
+    <string name="unknown">Onbekend</string>
+    <string name="relation_colon">Relatie: %s</string>
+    <string name="no_description_available">Geen beschrijving beschikbaar</string>
+    <string name="search">Zoeken</string>
+    <string name="search_in_people">Zoeken in personen</string>
+    <string name="family_tree">Stamboom</string>
+    <string name="view_in_family_tree">Bekijken in stamboom</string>
+    <string name="go_back">Vorige</string>
+    <string name="go_forward">Volgende</string>
+    <string name="database_is_empty">De database is leeg</string>
+</resources>
